@@ -1,1 +1,3 @@
-pub mod emulator;
+mod cpu;
+mod memory;
+mod constants;
