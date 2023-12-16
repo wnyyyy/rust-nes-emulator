@@ -1,3 +1,4 @@
+use crate::common::opcode::Opcode;
 use crate::cpu::types::ProcessorStatus;
 
 mod types;
@@ -29,47 +30,21 @@ impl CPU {
         self.program_counter = 0;
 
         loop {
-            let opscode = program[self.program_counter as usize];
+            let opcode_u8 = program[self.program_counter as usize];
+            let opcode = Opcode::from_u8(opcode_u8);
             self.program_counter += 1;
 
-            match opscode {
-                0xA9 => {
+            match opcode {
+                Opcode::Null => return,
+                Opcode::LdaImmediate =>  {
                     let param = program[self.program_counter as usize];
                     self.program_counter += 1;
-                    self.register_a = param;
 
-                    if self.register_a == 0 {
-                        self.status = self.status | 0b0000_0010;
-                    } else {
-                        self.status = self.status & 0b1111_1101;
-                    }
-
-                    if self.register_a & 0b1000_0000 != 0 {
-                        self.status = self.status | 0b1000_0000;
-                    } else {
-                        self.status = self.status & 0b0111_1111;
-                    }
+                    instructions::lda(self, param);
                 }
-                0xAA =>  {
-                    self.register_x = self.register_a;
-
-                    if self.register_x == 0 {
-                        self.status = self.status | 0b0000_0010;
-                    } else {
-                        self.status = self.status & 0b1111_1101;
-                    }
-
-                    if self.register_x & 0b1000_0000 != 0 {
-                        self.status = self.status | 0b1000_0000;
-                    } else {
-                        self.status = self.status & 0b0111_1111;
-                    }
-
+                Opcode::Tax  => {
+                    instructions::tax(self);
                 }
-                0x00 => {
-                    return;
-                }
-                _ => todo!()
             }
         }
     }
