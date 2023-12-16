@@ -1,16 +1,10 @@
-pub enum Opcode {
-    Null,
-    LdaImmediate,
-    Tax,
-}
+use num_enum::{IntoPrimitive, TryFromPrimitive};
 
-impl Opcode {
-    pub fn from_u8(value: u8) -> Opcode {
-        match value {
-            0x00 => Opcode::Null,
-            0xA9 => Opcode::LdaImmediate,
-            0xAA => Opcode::Tax,
-            _ => Opcode::Null,
-        }
-    }
+#[derive(IntoPrimitive, TryFromPrimitive, Debug)]
+#[repr(u8)]
+pub enum Opcode {
+    Null = 0x00,
+    LdaImmediate = 0xA9,
+    Tax = 0xAA,
+    Inx = 0xE8,
 }

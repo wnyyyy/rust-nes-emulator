@@ -14,3 +14,7 @@ pub fn tax(cpu: &mut CPU) {
     cpu.status.zero = cpu.register_x == 0;
     cpu.status.negative = is_negative(cpu.register_x);
 }
+
+pub fn inx(cpu: &mut CPU) {
+    todo!();
+}

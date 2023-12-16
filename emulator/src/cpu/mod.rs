@@ -31,7 +31,7 @@ impl CPU {
 
         loop {
             let opcode_u8 = program[self.program_counter as usize];
-            let opcode = Opcode::from_u8(opcode_u8);
+            let opcode: Opcode = Opcode::try_from(opcode_u8).expect("Invalid opcode");
             self.program_counter += 1;
 
             match opcode {
@@ -44,6 +44,9 @@ impl CPU {
                 }
                 Opcode::Tax  => {
                     instructions::tax(self);
+                }
+                Opcode::Inx => {
+                    instructions::inx(self);
                 }
             }
         }
