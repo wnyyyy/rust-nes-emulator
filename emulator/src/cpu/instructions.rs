@@ -16,5 +16,12 @@ pub fn tax(cpu: &mut CPU) {
 }
 
 pub fn inx(cpu: &mut CPU) {
-    todo!();
+    cpu.register_x = cpu.register_x.wrapping_add(1);
+
+    cpu.status.zero = cpu.register_x == 0;
+    cpu.status.negative = is_negative(cpu.register_x);
+}
+
+pub fn brk(cpu: &mut CPU) {
+    cpu.status.break_command = true;
 }

@@ -36,7 +36,10 @@ impl CPU {
             self.program_counter += 1;
 
             match opcode {
-                Opcode::Null => return Ok(()),
+                Opcode::Brk => {
+                    instructions::brk(self);
+                    break;
+                }
                 Opcode::LdaImmediate =>  {
                     let param = program[self.program_counter as usize];
                     self.program_counter += 1;
