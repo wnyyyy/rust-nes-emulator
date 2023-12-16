@@ -1,3 +1,4 @@
+use crate::common::errors::EmulatorError;
 use crate::common::opcode::Opcode;
 use crate::cpu::types::ProcessorStatus;
 
@@ -26,16 +27,16 @@ impl CPU {
         }
     }
 
-    pub fn interpret(&mut self, program: Vec<u8>) {
+    pub fn interpret(&mut self, program: Vec<u8>) -> Result<(), EmulatorError>{
         self.program_counter = 0;
 
         loop {
             let opcode_u8 = program[self.program_counter as usize];
-            let opcode: Opcode = Opcode::try_from(opcode_u8).expect("Invalid opcode");
+            let opcode= Opcode::try_from(opcode_u8).map_err(|_| EmulatorError::InvalidOpcode(opcode_u8))?;
             self.program_counter += 1;
 
             match opcode {
-                Opcode::Null => return,
+                Opcode::Null => return Ok(()),
                 Opcode::LdaImmediate =>  {
                     let param = program[self.program_counter as usize];
                     self.program_counter += 1;
@@ -50,5 +51,6 @@ impl CPU {
                 }
             }
         }
+        Ok(())
     }
 }
