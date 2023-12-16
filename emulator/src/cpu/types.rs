@@ -21,3 +21,19 @@ impl ProcessorStatus {
         }
     }
 }
+
+#[derive(Debug)]
+pub enum AddressingMode {
+    Implied,
+    Relative,
+    Immediate,
+    ZeroPage,
+    ZeroPageX,
+    ZeroPageY,
+    Absolute,
+    AbsoluteX,
+    AbsoluteY,
+    IndirectX,
+    IndirectY,
+    None,
+}
