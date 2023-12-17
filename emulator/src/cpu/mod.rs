@@ -98,7 +98,19 @@ impl CPU {
                 let address = self.memory.read_little_endian(self.program_counter)?;
                 Ok(address.wrapping_add(self.register_y as u16))
             }
-
+            AddressingMode::Indirect => {
+                let address = self.memory.read_little_endian(self.program_counter)?;
+                Ok(self.memory.read_little_endian(address)?)
+            }
+            AddressingMode::IndexedIndirect => {
+                let address = self.memory.read(self.program_counter)?.wrapping_add(self.register_x);
+                Ok(self.memory.read_little_endian(address as u16)?)
+            }
+            AddressingMode::IndirectIndexed => {
+                let address = self.memory.read(self.program_counter)?;
+                Ok(self.memory.read_little_endian(address as u16)?.wrapping_add(self.register_y as u16))
+            }
+            _ => Err(EmulatorError::UnimplementedAddressingMode(format!("{:?}", mode))),
         }
     }
 }
