@@ -1,1 +1,1 @@
-mod cpu_memory_map;
+pub mod cpu_memory_map;

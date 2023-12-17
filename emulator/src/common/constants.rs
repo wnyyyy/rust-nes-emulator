@@ -1,2 +1,2 @@
-const RAM_SIZE: usize = 2048;
-const MEMORY_SIZE: usize = 65536;
+pub const RAM_SIZE: u16 = 2048;
+pub const MEMORY_SIZE: u16 = u16::MAX;
