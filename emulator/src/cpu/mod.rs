@@ -37,8 +37,6 @@ impl CPU {
     }
 
     pub fn run(&mut self) -> Result<(), EmulatorError>{
-        self.program_counter = 0;
-
         loop {
             let opcode_u8 = self.memory.read(self.program_counter)?;
             let opcode= get_opcode(opcode_u8).ok_or(EmulatorError::InvalidOpcode(opcode_u8))?;
@@ -47,7 +45,8 @@ impl CPU {
             match opcode.name {
                 // Load and Store
                 "LDA" =>  {
-                    let param = program[self.program_counter as usize];
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    let param = self.memory.read(param_address)?;
                     self.program_counter += 1;
 
                     instructions::lda(self, param);
@@ -71,7 +70,7 @@ impl CPU {
         Ok(())
     }
 
-    fn get_param_address(&self, mode: AddressingMode) -> Result<(u16), EmulatorError> {
+    fn get_param_address(&self, mode: &AddressingMode) -> Result<u16, EmulatorError> {
         match mode {
             AddressingMode::Immediate => Ok(self.program_counter),
             AddressingMode::ZeroPage => {

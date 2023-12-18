@@ -12,7 +12,7 @@ impl fmt::Display for EmulatorError {
         match self {
             EmulatorError::InvalidOpcode(opcode) => write!(f, "Invalid opcode: {:x}", opcode),
             EmulatorError::UnimplementedOpcode(opcode) => write!(f, "Unimplemented opcode: {:x}", opcode),
-            EmulatorError::UnimplementedAddressingMode(name) => write!(f, "Unimplemented addressing mode: {}", name),
+            EmulatorError::UnimplementedAddressingMode(name) => write!(f, "Address mode does not have a parameter address: {}", name),
         }
     }
 }
