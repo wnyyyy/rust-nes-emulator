@@ -26,8 +26,8 @@ pub fn get_opcode(code: u8) -> Option<&'static Opcode> {
     OPCODES.get(&code)
 }
 
-pub fn get_opcode_by_name(name: &str) -> Option<&'static Opcode> {
-    OPCODES.values().find(|opcode| opcode.name == name)
+pub fn get_opcode_by_name_and_address_mode(name: &str, address_mode: AddressingMode) -> Option<&'static Opcode> {
+    OPCODES.values().find(|opcode| opcode.name == name && opcode.address_mode == address_mode)
 }
 
 lazy_static! {

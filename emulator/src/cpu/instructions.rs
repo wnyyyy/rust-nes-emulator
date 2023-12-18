@@ -12,6 +12,32 @@ pub fn lda(cpu: &mut CPU, param: u8) {
     cpu.status.negative = is_negative(cpu.register_a);
 }
 
+pub fn ldx(cpu: &mut CPU, param: u8) {
+    cpu.register_x = param;
+
+    cpu.status.zero = cpu.register_x == 0;
+    cpu.status.negative = is_negative(cpu.register_x);
+}
+
+pub fn ldy(cpu: &mut CPU, param: u8) {
+    cpu.register_y = param;
+
+    cpu.status.zero = cpu.register_y == 0;
+    cpu.status.negative = is_negative(cpu.register_y);
+}
+
+pub fn sta(cpu: &mut CPU, param: u16) {
+    cpu.memory.write(param, cpu.register_a).unwrap();
+}
+
+pub fn stx(cpu: &mut CPU, param: u16) {
+    cpu.memory.write(param, cpu.register_x).unwrap();
+}
+
+pub fn sty(cpu: &mut CPU, param: u16) {
+    cpu.memory.write(param, cpu.register_y).unwrap();
+}
+
 pub fn tax(cpu: &mut CPU) {
     cpu.register_x = cpu.register_a;
 

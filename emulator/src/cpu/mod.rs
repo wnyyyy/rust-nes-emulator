@@ -40,16 +40,36 @@ impl CPU {
         loop {
             let opcode_u8 = self.memory.read(self.program_counter)?;
             let opcode= get_opcode(opcode_u8).ok_or(EmulatorError::InvalidOpcode(opcode_u8))?;
-            self.program_counter += opcode.bytes as u16;
+            self.program_counter += 1;
 
             match opcode.name {
                 // Load and Store
                 "LDA" =>  {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
                     let param = self.memory.read(param_address)?;
-                    self.program_counter += 1;
-
                     instructions::lda(self, param);
+                }
+                "LDX" => {
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    let param = self.memory.read(param_address)?;
+                    instructions::ldx(self, param);
+                }
+                "LDY" => {
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    let param = self.memory.read(param_address)?;
+                    instructions::ldy(self, param);
+                }
+                "STA" => {
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    instructions::sta(self, param_address);
+                }
+                "STX" => {
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    instructions::stx(self, param_address);
+                }
+                "STY" => {
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    instructions::sty(self, param_address);
                 }
                 // Register Transfer
                 "TAX"  => {
@@ -66,6 +86,7 @@ impl CPU {
                 }
                 _ => return Err(EmulatorError::UnimplementedOpcode(opcode_u8)),
             }
+            self.program_counter += opcode.bytes as u16 - 1;
         }
         Ok(())
     }

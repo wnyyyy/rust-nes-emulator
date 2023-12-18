@@ -22,7 +22,7 @@ impl ProcessorStatus {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum AddressingMode {
     Implied,
     Relative,
