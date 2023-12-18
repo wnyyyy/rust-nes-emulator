@@ -5,13 +5,13 @@ use std::collections::HashMap;
 pub struct Opcode {
     pub name: &'static str,
     pub code: u8,
-    pub bytes: u8,
-    pub cycles: u8,
+    pub bytes: usize,
+    pub cycles: usize,
     pub address_mode: AddressingMode,
 }
 
 impl Opcode {
-    fn new(name: &'static str, code: u8, bytes: u8, cycles: u8, address_mode: AddressingMode) -> Opcode {
+    fn new(name: &'static str, code: u8, bytes: usize, cycles: usize, address_mode: AddressingMode) -> Opcode {
         Opcode {
             name,
             code,

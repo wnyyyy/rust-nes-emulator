@@ -40,7 +40,7 @@ impl CPU {
         loop {
             let opcode_u8 = self.memory.read(self.program_counter)?;
             let opcode= get_opcode(opcode_u8).ok_or(EmulatorError::InvalidOpcode(opcode_u8))?;
-            self.program_counter += 1;
+            self.program_counter += opcode.bytes as u16;
 
             match opcode.name {
                 // Load and Store
