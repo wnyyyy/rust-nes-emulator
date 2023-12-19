@@ -82,13 +82,30 @@ impl CPU {
                     let param = self.memory.read(param_address)?;
                     instructions::sbc(self, param);
                 }
+                // Increment and Decrement
+                "INC" => {
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    instructions::inc(self, param_address)?;
+                }
+                "INX" => {
+                    instructions::inx(self);
+                }
+                "INY" => {
+                    instructions::iny(self);
+                }
+                "DEC" => {
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    instructions::dec(self, param_address)?;
+                }
+                "DEX" => {
+                    instructions::dex(self);
+                }
+                "DEY" => {
+                    instructions::dey(self);
+                }
                 // Register Transfer
                 "TAX"  => {
                     instructions::tax(self);
-                }
-                // Increment and Decrement
-                "INX" => {
-                    instructions::inx(self);
                 }
                 // Subroutine and Interrupt
                 "BRK" => {

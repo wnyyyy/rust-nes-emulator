@@ -386,22 +386,43 @@ mod test {
     }
 
     #[test]
-    fn test_tax_negative() {
+    fn test_inc_positive() {
         let mut cpu = initialize_cpu();
-        cpu.register_a = 0x85;
-        let code = get_opcode_by_name_and_address_mode("TAX", AddressingMode::Implied).unwrap().code;
-        cpu.load_and_run(vec![code, 0, 0]).unwrap();
-        assert_eq!(cpu.register_a, 0x85);
+        let address = 0x10;
+        let value = 0x05;
+        let code = get_opcode_by_name_and_address_mode("INC", AddressingMode::ZeroPage).unwrap().code;
+        cpu.memory.write(address, value as u8).unwrap();
+        cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
+        let stored = cpu.memory.read(address).unwrap();
+        assert_eq!(stored, 0x06);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_inc_negative() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("INC", AddressingMode::ZeroPage).unwrap().code;
+        let address = 0x10;
+        let value = 0x7F;
+        cpu.memory.write(address, value as u8).unwrap();
+        cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
+        let stored = cpu.memory.read(address).unwrap();
+        assert_eq!(stored, 0x80);
         assert!(!cpu.status.zero);
         assert!(cpu.status.negative);
     }
 
     #[test]
-    fn test_tax_zero() {
+    fn test_inc_zero() {
         let mut cpu = initialize_cpu();
-        let code = get_opcode_by_name_and_address_mode("TAX", AddressingMode::Implied).unwrap().code;
-        cpu.load_and_run(vec![code, 0, 0]).unwrap();
-        assert_eq!(cpu.register_a, 0);
+        let code = get_opcode_by_name_and_address_mode("INC", AddressingMode::ZeroPage).unwrap().code;
+        let address = 0x10;
+        let value = 0xFF;
+        cpu.memory.write(address, value as u8).unwrap();
+        cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
+        let stored = cpu.memory.read(address).unwrap();
+        assert_eq!(stored, 0x00);
         assert!(cpu.status.zero);
         assert!(!cpu.status.negative);
     }
@@ -435,6 +456,168 @@ mod test {
         cpu.register_x = 0xFF;
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
         assert_eq!(cpu.register_x, 0x00);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_iny_positive() {
+        let mut cpu = initialize_cpu();
+        cpu.register_y = 0x05;
+        let code = get_opcode_by_name_and_address_mode("INY", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_y, 0x06);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_iny_negative() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("INY", AddressingMode::Implied).unwrap().code;
+        cpu.register_y = 0x7F;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_y, 0x80);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_iny_zero() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("INY", AddressingMode::Implied).unwrap().code;
+        cpu.register_y = 0xFF;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_y, 0x00);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_dec_positive() {
+        let mut cpu = initialize_cpu();
+        let address = 0x10;
+        let value = 0x07;
+        let code = get_opcode_by_name_and_address_mode("DEC", AddressingMode::ZeroPage).unwrap().code;
+        cpu.memory.write(address, value as u8).unwrap();
+        cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
+        let stored = cpu.memory.read(address).unwrap();
+        assert_eq!(stored, 0x06);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_dec_negative() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("DEC", AddressingMode::ZeroPage).unwrap().code;
+        let address = 0x10;
+        let value = 0x00;
+        cpu.memory.write(address, value as u8).unwrap();
+        cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
+        let stored = cpu.memory.read(address).unwrap();
+        assert_eq!(stored, 0xFF);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_dec_zero() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("DEC", AddressingMode::ZeroPage).unwrap().code;
+        let address = 0x10;
+        let value = 0x01;
+        cpu.memory.write(address, value as u8).unwrap();
+        cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
+        let stored = cpu.memory.read(address).unwrap();
+        assert_eq!(stored, 0x00);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_dex_positive() {
+        let mut cpu = initialize_cpu();
+        cpu.register_x = 0x07;
+        let code = get_opcode_by_name_and_address_mode("DEX", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_x, 0x06);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_dex_negative() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("DEX", AddressingMode::Implied).unwrap().code;
+        cpu.register_x = 0x00;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_x, 0xFF);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_dex_zero() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("DEX", AddressingMode::Implied).unwrap().code;
+        cpu.register_x = 0x01;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_x, 0x00);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_dey_positive() {
+        let mut cpu = initialize_cpu();
+        cpu.register_y = 0x07;
+        let code = get_opcode_by_name_and_address_mode("DEY", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_y, 0x06);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_dey_negative() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("DEY", AddressingMode::Implied).unwrap().code;
+        cpu.register_y = 0x00;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_y, 0xFF);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_dey_zero() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("DEY", AddressingMode::Implied).unwrap().code;
+        cpu.register_y = 0x01;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_y, 0x00);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_tax_negative() {
+        let mut cpu = initialize_cpu();
+        cpu.register_a = 0x85;
+        let code = get_opcode_by_name_and_address_mode("TAX", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0x85);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_tax_zero() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("TAX", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0);
         assert!(cpu.status.zero);
         assert!(!cpu.status.negative);
     }
