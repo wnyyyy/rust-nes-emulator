@@ -63,13 +63,6 @@ pub fn sbc(cpu: &mut CPU, param: u8) {
     cpu.status.overflow = overflows_negative(result as u16, old_a, param);
 }
 
-pub fn tax(cpu: &mut CPU) {
-    cpu.register_x = cpu.register_a;
-
-    cpu.status.zero = cpu.register_x == 0;
-    cpu.status.negative = is_negative(cpu.register_x);
-}
-
 pub fn inc(cpu: &mut CPU, param: u16) -> Result<(), EmulatorError>{
     let value = cpu.memory.read(param)?;
     let result = value.wrapping_add(1);
@@ -116,4 +109,32 @@ pub fn dey(cpu: &mut CPU) {
 
     cpu.status.zero = cpu.register_y == 0;
     cpu.status.negative = is_negative(cpu.register_y);
+}
+
+pub fn tax(cpu: &mut CPU) {
+    cpu.register_x = cpu.register_a;
+
+    cpu.status.zero = cpu.register_x == 0;
+    cpu.status.negative = is_negative(cpu.register_x);
+}
+
+pub fn tay(cpu: &mut CPU) {
+    cpu.register_y = cpu.register_a;
+
+    cpu.status.zero = cpu.register_y == 0;
+    cpu.status.negative = is_negative(cpu.register_y);
+}
+
+pub fn txa(cpu: &mut CPU) {
+    cpu.register_a = cpu.register_x;
+
+    cpu.status.zero = cpu.register_a == 0;
+    cpu.status.negative = is_negative(cpu.register_a);
+}
+
+pub fn tya(cpu: &mut CPU) {
+    cpu.register_a = cpu.register_y;
+
+    cpu.status.zero = cpu.register_a == 0;
+    cpu.status.negative = is_negative(cpu.register_a);
 }

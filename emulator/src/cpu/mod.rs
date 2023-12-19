@@ -107,6 +107,15 @@ impl CPU {
                 "TAX"  => {
                     instructions::tax(self);
                 }
+                "TAY"  => {
+                    instructions::tay(self);
+                }
+                "TXA"  => {
+                    instructions::txa(self);
+                }
+                "TYA"  => {
+                    instructions::tya(self);
+                }
                 // Subroutine and Interrupt
                 "BRK" => {
                     instructions::brk(self);

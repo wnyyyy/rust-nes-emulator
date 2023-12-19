@@ -111,18 +111,6 @@ mod test {
         assert_eq!(stored, test_value);
     }
 
-
-    #[test]
-    fn test_tax_positive() {
-        let mut cpu = initialize_cpu();
-        cpu.register_a = 0x05;
-        let code = get_opcode_by_name_and_address_mode("TAX", AddressingMode::Implied).unwrap().code;
-        cpu.load_and_run(vec![code, 0, 0]).unwrap();
-        assert_eq!(cpu.register_a, 0x05);
-        assert!(!cpu.status.zero);
-        assert!(!cpu.status.negative);
-    }
-
     #[test]
     fn test_stx_stores_in_memory() {
         let mut cpu = initialize_cpu();
@@ -602,12 +590,23 @@ mod test {
     }
 
     #[test]
+    fn test_tax_positive() {
+        let mut cpu = initialize_cpu();
+        cpu.register_a = 0x05;
+        let code = get_opcode_by_name_and_address_mode("TAX", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_x, 0x05);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
     fn test_tax_negative() {
         let mut cpu = initialize_cpu();
         cpu.register_a = 0x85;
         let code = get_opcode_by_name_and_address_mode("TAX", AddressingMode::Implied).unwrap().code;
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
-        assert_eq!(cpu.register_a, 0x85);
+        assert_eq!(cpu.register_x, 0x85);
         assert!(!cpu.status.zero);
         assert!(cpu.status.negative);
     }
@@ -615,7 +614,107 @@ mod test {
     #[test]
     fn test_tax_zero() {
         let mut cpu = initialize_cpu();
+        cpu.register_x = 1;
         let code = get_opcode_by_name_and_address_mode("TAX", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_x, 0);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_tay_positive() {
+        let mut cpu = initialize_cpu();
+        cpu.register_a = 0x05;
+        let code = get_opcode_by_name_and_address_mode("TAY", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_y, 0x05);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_tay_negative() {
+        let mut cpu = initialize_cpu();
+        cpu.register_a = 0x85;
+        let code = get_opcode_by_name_and_address_mode("TAY", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_y, 0x85);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_tay_zero() {
+        let mut cpu = initialize_cpu();
+        cpu.register_y = 1;
+        let code = get_opcode_by_name_and_address_mode("TAY", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_y, 0);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_txa_positive() {
+        let mut cpu = initialize_cpu();
+        cpu.register_x = 0x05;
+        let code = get_opcode_by_name_and_address_mode("TXA", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0x05);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_txa_negative() {
+        let mut cpu = initialize_cpu();
+        cpu.register_x = 0x85;
+        let code = get_opcode_by_name_and_address_mode("TXA", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0x85);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_txa_zero() {
+        let mut cpu = initialize_cpu();
+        cpu.register_a = 1;
+        let code = get_opcode_by_name_and_address_mode("TXA", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_tya_positive() {
+        let mut cpu = initialize_cpu();
+        cpu.register_y = 0x05;
+        let code = get_opcode_by_name_and_address_mode("TYA", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0x05);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_tya_negative() {
+        let mut cpu = initialize_cpu();
+        cpu.register_y = 0x85;
+        let code = get_opcode_by_name_and_address_mode("TYA", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0x85);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_tya_zero() {
+        let mut cpu = initialize_cpu();
+        cpu.register_a = 1;
+        let code = get_opcode_by_name_and_address_mode("TYA", AddressingMode::Implied).unwrap().code;
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
         assert_eq!(cpu.register_a, 0);
         assert!(cpu.status.zero);
