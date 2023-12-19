@@ -71,6 +71,17 @@ impl CPU {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
                     instructions::sty(self, param_address);
                 }
+                // Arithmetic
+                "ADC" => {
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    let param = self.memory.read(param_address)?;
+                    instructions::adc(self, param);
+                }
+                "SBC" => {
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    let param = self.memory.read(param_address)?;
+                    instructions::sbc(self, param);
+                }
                 // Register Transfer
                 "TAX"  => {
                     instructions::tax(self);

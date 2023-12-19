@@ -148,6 +148,244 @@ mod test {
     }
 
     #[test]
+    fn test_arithmetic_1() {
+        let mut cpu = initialize_cpu();
+        let adc = get_opcode_by_name_and_address_mode("ADC", AddressingMode::Immediate).unwrap().code;
+        let sub = get_opcode_by_name_and_address_mode("SBC", AddressingMode::Immediate).unwrap().code;
+        let values = [10, 3, 20, 4]; // 5 + 10 - 13 - 8 + 50
+        let expected = 22;
+        cpu.register_a = 0;
+        cpu.load_and_run(vec![adc, values[0], sub, values[1], adc, values[2], sub, values[3], 0]).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.carry);
+    }
+
+    #[test]
+    fn test_arithmetic_2() {
+        let mut cpu = initialize_cpu();
+        let adc = get_opcode_by_name_and_address_mode("ADC", AddressingMode::Immediate).unwrap().code;
+        let sub = get_opcode_by_name_and_address_mode("SBC", AddressingMode::Immediate).unwrap().code;
+        let values = [1, 1, 1, 10, 9]; // - 1 + 1 + 1 - 10 - 9
+        let expected: i8 = -1;
+        cpu.register_a = 0;
+        cpu.load_and_run(vec![sub, values[0], adc, values[1], adc, values[2], sub, values[3], adc, values[4], 0]).unwrap();
+        assert_eq!(cpu.register_a, expected as u8);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_arithmetic_3() {
+        let mut cpu = initialize_cpu();
+        let adc = get_opcode_by_name_and_address_mode("ADC", AddressingMode::Immediate).unwrap().code;
+        let sub = get_opcode_by_name_and_address_mode("SBC", AddressingMode::Immediate).unwrap().code;
+        let values = [5, 7, 1, 10, 6]; // - 5 + 7 + 1 - 10 + 6
+        let expected = -2;
+        cpu.register_a = 0;
+        cpu.load_and_run(vec![sub, values[0], adc, values[1], adc, values[2], sub, values[3], adc, values[4], 0]).unwrap();
+        assert_eq!(cpu.register_a, expected as u8);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_arithmetic_4() {
+        let mut cpu = initialize_cpu();
+        let adc = get_opcode_by_name_and_address_mode("ADC", AddressingMode::Immediate).unwrap().code;
+        let sub = get_opcode_by_name_and_address_mode("SBC", AddressingMode::Immediate).unwrap().code;
+        let values = [128, 128, 1, 1]; // - 5 + 7 + 1 - 10 + 6
+        let expected = 0;
+        cpu.register_a = 0;
+        cpu.load_and_run(vec![adc, values[0], adc, values[1], sub, values[2], adc, values[3], 0]).unwrap();
+        assert_eq!(cpu.register_a, expected as u8);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.carry);
+    }
+
+    #[test]
+    fn test_arithmetic_5() {
+        let mut cpu = initialize_cpu();
+        let adc = get_opcode_by_name_and_address_mode("ADC", AddressingMode::Immediate).unwrap().code;
+        let sub = get_opcode_by_name_and_address_mode("SBC", AddressingMode::Immediate).unwrap().code;
+        let values = [1, 2, 5, 10]; // - 5 + 7 + 1 - 10 + 6
+        let expected = 249;
+        cpu.register_a = 0;
+        cpu.load_and_run(vec![adc, values[0], sub, values[1], adc, values[2], sub, values[3], 0]).unwrap();
+        assert_eq!(cpu.register_a, expected as u8);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.carry);
+    }
+
+    #[test]
+    fn test_adc_no_flags_plus_carry() {
+        let mut cpu = initialize_cpu();
+        let base_value = 0x05;
+        let add_value = 0x01;
+        cpu.register_a = base_value;
+        cpu.status.carry = true;
+        let code = get_opcode_by_name_and_address_mode("ADC", AddressingMode::Immediate).unwrap().code;
+        cpu.load_and_run(vec![code, add_value, 0]).unwrap();
+        assert_eq!(cpu.register_a, base_value + add_value + 1);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.carry);
+        assert!(!cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_adc_overflow_negative() {
+        let mut cpu = initialize_cpu();
+        let base_value:i8 = -128;
+        let add_value:i8 = -1;
+        cpu.register_a = base_value as u8;
+        let code = get_opcode_by_name_and_address_mode("ADC", AddressingMode::Immediate).unwrap().code;
+        cpu.load_and_run(vec![code, add_value as u8, 0]).unwrap();
+        assert!(cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_adc_overflow_positive() {
+        let mut cpu = initialize_cpu();
+        let base_value = 127;
+        let add_value = 1;
+        cpu.register_a = base_value;
+        let code = get_opcode_by_name_and_address_mode("ADC", AddressingMode::Immediate).unwrap().code;
+        cpu.load_and_run(vec![code, add_value, 0]).unwrap();
+        assert!(cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_adc_negative() {
+        let mut cpu = initialize_cpu();
+        let base_value = 59;
+        let add_value: i8 = -60;
+        cpu.register_a = base_value;
+        let code = get_opcode_by_name_and_address_mode("ADC", AddressingMode::Immediate).unwrap().code;
+        cpu.load_and_run(vec![code, add_value as u8, 0]).unwrap();
+        assert_eq!(cpu.register_a as i8, -1);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.carry);
+        assert!(!cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_adc_zero_and_carry() {
+        let mut cpu = initialize_cpu();
+        let base_value = 255;
+        let add_value = 1;
+        cpu.register_a = base_value;
+        let code = get_opcode_by_name_and_address_mode("ADC", AddressingMode::Immediate).unwrap().code;
+        cpu.load_and_run(vec![code, add_value, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.carry);
+        assert!(!cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_sbc_no_flags_plus_borrow() {
+        let mut cpu = initialize_cpu();
+        let base_value = 5;
+        let sub_value = 1;
+        cpu.status.carry = false;
+        cpu.register_a = base_value;
+        let code = get_opcode_by_name_and_address_mode("SBC", AddressingMode::Immediate).unwrap().code;
+        cpu.load_and_run(vec![code, sub_value, 0]).unwrap();
+        assert_eq!(cpu.register_a, base_value - sub_value - 1);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.carry);
+        assert!(!cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_sbc_carry() {
+        let mut cpu = initialize_cpu();
+        let base_value = 5;
+        let sub_value = 3;
+        cpu.status.carry = true;
+        cpu.register_a = base_value;
+        let code = get_opcode_by_name_and_address_mode("SBC", AddressingMode::Immediate).unwrap().code;
+        cpu.load_and_run(vec![code, sub_value, 0]).unwrap();
+        assert_eq!(cpu.register_a, base_value - sub_value);
+        assert!(cpu.status.carry);
+    }
+
+    #[test]
+    fn test_sbc_carry_borrow() {
+        let mut cpu = initialize_cpu();
+        let base_value = 0;
+        let sub_value = 1;
+        cpu.status.carry = false;
+        cpu.register_a = base_value;
+        let code = get_opcode_by_name_and_address_mode("SBC", AddressingMode::Immediate).unwrap().code;
+        cpu.load_and_run(vec![code, sub_value, 0]).unwrap();
+        assert!(!cpu.status.carry);
+    }
+
+    #[test]
+    fn test_sbc_overflow_negative() {
+        let mut cpu = initialize_cpu();
+        let base_value:i8  = -120;
+        let sub_value = 9;
+        cpu.status.carry = true;
+        cpu.register_a = base_value as u8;
+        let code = get_opcode_by_name_and_address_mode("SBC", AddressingMode::Immediate).unwrap().code;
+        cpu.load_and_run(vec![code, sub_value, 0]).unwrap();
+        assert!(cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_sbc_overflow_positive() {
+        let mut cpu = initialize_cpu();
+        let base_value = 120;
+        let sub_value :i8 = -8;
+        cpu.status.carry = true;
+        cpu.register_a = base_value;
+        let code = get_opcode_by_name_and_address_mode("SBC", AddressingMode::Immediate).unwrap().code;
+        cpu.load_and_run(vec![code, sub_value as u8, 0]).unwrap();
+        assert!(cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_sbc_negative() {
+        let mut cpu = initialize_cpu();
+        let base_value= 5;
+        let sub_value = 6;
+        cpu.status.carry = true;
+        cpu.register_a = base_value as u8;
+        let code = get_opcode_by_name_and_address_mode("SBC", AddressingMode::Immediate).unwrap().code;
+        cpu.load_and_run(vec![code, sub_value as u8, 0]).unwrap();
+        assert_eq!(cpu.register_a, (base_value - sub_value) as u8);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.carry);
+        assert!(!cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_sbc_zero() {
+        let mut cpu = initialize_cpu();
+        let base_value = 10;
+        let sub_value = 10;
+        cpu.status.carry = true;
+        cpu.register_a = base_value;
+        let code = get_opcode_by_name_and_address_mode("SBC", AddressingMode::Immediate).unwrap().code;
+        cpu.load_and_run(vec![code, sub_value, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.carry);
+        assert!(!cpu.status.overflow);
+    }
+
+    #[test]
     fn test_tax_negative() {
         let mut cpu = initialize_cpu();
         cpu.register_a = 0x85;
