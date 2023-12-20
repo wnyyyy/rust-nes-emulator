@@ -22,7 +22,7 @@ impl CPU {
     pub fn new() -> CPU {
         CPU {
             program_counter: 0,
-            stack_pointer: 0,
+            stack_pointer: 0xFF,
             register_a: 0,
             register_x: 0,
             register_y: 0,
@@ -224,6 +224,10 @@ impl CPU {
                 "BVS" => {
                     let offset = self.get_param_address(&opcode.address_mode)?;
                     instructions::bvs(self, offset)?;
+                }
+                // Stack
+                "TSX" => {
+                    instructions::tsx(self);
                 }
                 // Subroutine and Interrupt
                 "BRK" => {

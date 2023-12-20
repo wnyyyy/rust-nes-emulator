@@ -326,3 +326,13 @@ pub fn bvs(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     }
     Ok(())
 }
+
+pub fn tsx(cpu: &mut CPU) {
+    cpu.register_x = cpu.stack_pointer;
+    cpu.status.zero = cpu.register_x == 0;
+    cpu.status.negative = is_negative(cpu.register_x);
+}
+
+pub fn txs(cpu: &mut CPU) {
+    cpu.stack_pointer = cpu.register_x;
+}

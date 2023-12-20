@@ -1581,6 +1581,53 @@ mod test {
     }
 
     #[test]
+    fn test_tsx_positive() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("TSX", AddressingMode::Implied).unwrap().code;
+        cpu.stack_pointer = 0x10;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_x, 0x10);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_tsx_negative() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("TSX", AddressingMode::Implied).unwrap().code;
+        cpu.stack_pointer = 0xFF;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_x, 0xFF);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_tsx_zero() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("TSX", AddressingMode::Implied).unwrap().code;
+        cpu.stack_pointer = 0x00;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_x, 0x00);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_txs() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("TXS", AddressingMode::Implied).unwrap().code;
+        cpu.register_x = 0x10;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.stack_pointer, 0x10);
+    }
+
+    #[test]
+    fn test_pha() {
+
+    }
+
+    #[test]
     fn test_brk_flag() {
         let mut cpu = initialize_cpu();
         let code = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().code;
