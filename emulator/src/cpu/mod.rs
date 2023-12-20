@@ -229,6 +229,9 @@ impl CPU {
                 "TSX" => {
                     instructions::tsx(self);
                 }
+                "TXS" => {
+                    instructions::txs(self);
+                }
                 // Subroutine and Interrupt
                 "BRK" => {
                     instructions::brk(self);
