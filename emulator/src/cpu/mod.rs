@@ -132,6 +132,27 @@ impl CPU {
                     let param = self.memory.read(param_address)?;
                     instructions::ora(self, param);
                 }
+                // Compare and Bit Test
+                "CMP" => {
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    let param = self.memory.read(param_address)?;
+                    instructions::cmp(self, param);
+                }
+                "CPX" => {
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    let param = self.memory.read(param_address)?;
+                    instructions::cpx(self, param);
+                }
+                "CPY" => {
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    let param = self.memory.read(param_address)?;
+                    instructions::cpy(self, param);
+                }
+                "BIT" => {
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    let param = self.memory.read(param_address)?;
+                    instructions::bit(self, param);
+                }
                 // Subroutine and Interrupt
                 "BRK" => {
                     instructions::brk(self);

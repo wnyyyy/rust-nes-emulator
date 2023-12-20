@@ -845,6 +845,170 @@ mod test {
     }
 
     #[test]
+    fn test_cmp_carry() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("CMP", AddressingMode::Immediate).unwrap().code;
+        let value = 0x10;
+        cpu.register_a = 0x20;
+        cpu.load_and_run(vec![code, value, 0]).unwrap();
+        assert!(cpu.status.carry);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_cmp_zero() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("CMP", AddressingMode::Immediate).unwrap().code;
+        let value = 0x20;
+        cpu.register_a = 0x20;
+        cpu.load_and_run(vec![code, value, 0]).unwrap();
+        assert!(cpu.status.carry);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.zero);
+    }
+
+    #[test]
+    fn test_cmp_negative() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("CMP", AddressingMode::Immediate).unwrap().code;
+        let value = 0x21;
+        cpu.register_a = 0x20;
+        cpu.load_and_run(vec![code, value, 0]).unwrap();
+        assert!(!cpu.status.carry);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_cpx_carry() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("CPX", AddressingMode::Immediate).unwrap().code;
+        let value = 0x10;
+        cpu.register_x = 0x20;
+        cpu.load_and_run(vec![code, value, 0]).unwrap();
+        assert!(cpu.status.carry);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_cpx_zero() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("CPX", AddressingMode::Immediate).unwrap().code;
+        let value = 0x20;
+        cpu.register_x = 0x20;
+        cpu.load_and_run(vec![code, value, 0]).unwrap();
+        assert!(cpu.status.carry);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.zero);
+    }
+
+    #[test]
+    fn test_cpx_negative() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("CPX", AddressingMode::Immediate).unwrap().code;
+        let value = 0x21;
+        cpu.register_x = 0x20;
+        cpu.load_and_run(vec![code, value, 0]).unwrap();
+        assert!(!cpu.status.carry);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_cpy_carry() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("CPY", AddressingMode::Immediate).unwrap().code;
+        let value = 0x10;
+        cpu.register_y = 0x20;
+        cpu.load_and_run(vec![code, value, 0]).unwrap();
+        assert!(cpu.status.carry);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_cpy_zero() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("CPY", AddressingMode::Immediate).unwrap().code;
+        let value = 0x20;
+        cpu.register_y = 0x20;
+        cpu.load_and_run(vec![code, value, 0]).unwrap();
+        assert!(cpu.status.carry);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.zero);
+    }
+
+    #[test]
+    fn test_cpy_negative() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("CPY", AddressingMode::Immediate).unwrap().code;
+        let value = 0x21;
+        cpu.register_y = 0x20;
+        cpu.load_and_run(vec![code, value, 0]).unwrap();
+        assert!(!cpu.status.carry);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_bit_positive() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("BIT", AddressingMode::ZeroPage).unwrap().code;
+        let address = 0x10;
+        let value = 0b0011_1111;
+        cpu.memory.write(address, value).unwrap();
+        cpu.register_a = 0b1111_1111;
+        cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_bit_negative() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("BIT", AddressingMode::ZeroPage).unwrap().code;
+        let address = 0x10;
+        let value = 0b1000_0000;
+        cpu.memory.write(address, value).unwrap();
+        cpu.register_a = 0b1111_1111;
+        cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_bit_zero() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("BIT", AddressingMode::ZeroPage).unwrap().code;
+        let address = 0x10;
+        let value = 0b0011_1100;
+        cpu.memory.write(address, value).unwrap();
+        cpu.register_a = 0b0000_0011;
+        cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_bit_overflow() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("BIT", AddressingMode::ZeroPage).unwrap().code;
+        let address = 0x10;
+        let value = 0b0100_0000;
+        cpu.memory.write(address, value).unwrap();
+        cpu.register_a = 0;
+        cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.overflow);
+    }
+
+    #[test]
     fn test_brk_flag() {
         let mut cpu = initialize_cpu();
         let code = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().code;

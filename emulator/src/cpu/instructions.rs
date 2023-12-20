@@ -159,3 +159,30 @@ pub fn ora(cpu: &mut CPU, param: u8) {
     cpu.status.zero = cpu.register_a == 0;
     cpu.status.negative = is_negative(cpu.register_a);
 }
+
+pub fn cmp(cpu: &mut CPU, param: u8) {
+    let result = cpu.register_a.wrapping_sub(param);
+    cpu.status.zero = result == 0;
+    cpu.status.negative = is_negative(result);
+    cpu.status.carry = cpu.register_a >= param;
+}
+
+pub fn cpx(cpu: &mut CPU, param: u8) {
+    let result = cpu.register_x.wrapping_sub(param);
+    cpu.status.zero = result == 0;
+    cpu.status.negative = is_negative(result);
+    cpu.status.carry = cpu.register_x >= param;
+}
+
+pub fn cpy(cpu: &mut CPU, param: u8) {
+    let result = cpu.register_y.wrapping_sub(param);
+    cpu.status.zero = result == 0;
+    cpu.status.negative = is_negative(result);
+    cpu.status.carry = cpu.register_y >= param;
+}
+
+pub fn bit(cpu: &mut CPU, param: u8) {
+    cpu.status.zero = cpu.register_a & param == 0;
+    cpu.status.negative = is_negative(param);
+    cpu.status.overflow = param & 0b0100_0000 != 0;
+}
