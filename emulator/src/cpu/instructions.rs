@@ -138,3 +138,24 @@ pub fn tya(cpu: &mut CPU) {
     cpu.status.zero = cpu.register_a == 0;
     cpu.status.negative = is_negative(cpu.register_a);
 }
+
+pub fn and(cpu: &mut CPU, param: u8) {
+    cpu.register_a &= param;
+
+    cpu.status.zero = cpu.register_a == 0;
+    cpu.status.negative = is_negative(cpu.register_a);
+}
+
+pub fn eor(cpu: &mut CPU, param: u8) {
+    cpu.register_a ^= param;
+
+    cpu.status.zero = cpu.register_a == 0;
+    cpu.status.negative = is_negative(cpu.register_a);
+}
+
+pub fn ora(cpu: &mut CPU, param: u8) {
+    cpu.register_a |= param;
+
+    cpu.status.zero = cpu.register_a == 0;
+    cpu.status.negative = is_negative(cpu.register_a);
+}

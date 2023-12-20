@@ -102,7 +102,7 @@ mod test {
     #[test]
     fn test_sta_stores_in_memory() {
         let mut cpu = initialize_cpu();
-        let test_addr = 0xB0;
+        let test_addr = 0x08;
         let test_value = 0x05;
         cpu.register_a = test_value;
         let code = get_opcode_by_name_and_address_mode("STA", AddressingMode::ZeroPage).unwrap().code;
@@ -114,7 +114,7 @@ mod test {
     #[test]
     fn test_stx_stores_in_memory() {
         let mut cpu = initialize_cpu();
-        let test_addr = 0xB0;
+        let test_addr = 0x1A;
         let test_value = 0x05;
         cpu.register_x = test_value;
         let code = get_opcode_by_name_and_address_mode("STX", AddressingMode::ZeroPage).unwrap().code;
@@ -126,7 +126,7 @@ mod test {
     #[test]
     fn test_sty_stores_in_memory() {
         let mut cpu = initialize_cpu();
-        let test_addr = 0xB0;
+        let test_addr = 0x1E;
         let test_value = 0x05;
         cpu.register_y = test_value;
         let code = get_opcode_by_name_and_address_mode("STY", AddressingMode::ZeroPage).unwrap().code;
@@ -717,6 +717,129 @@ mod test {
         let code = get_opcode_by_name_and_address_mode("TYA", AddressingMode::Implied).unwrap().code;
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
         assert_eq!(cpu.register_a, 0);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_and_positive() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("AND", AddressingMode::ZeroPage).unwrap().code;
+        let address= 0x10;
+        let memory_value = 0b1010_1010;
+        let expected = 0b0010_1000;
+        cpu.memory.write(address, memory_value).unwrap();
+        cpu.register_a = 0b0010_1100;
+        cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_and_negative() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("AND", AddressingMode::ZeroPage).unwrap().code;
+        let address= 0x10;
+        let memory_value = 0b1010_1010;
+        let expected = 0b1010_1000;
+        cpu.memory.write(address, memory_value).unwrap();
+        cpu.register_a = 0b1110_1100;
+        cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_and_zero() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("AND", AddressingMode::ZeroPage).unwrap().code;
+        let address= 0x10;
+        let memory_value = 0b0000_0011;
+        let expected = 0b0000_0000;
+        cpu.memory.write(address, memory_value).unwrap();
+        cpu.register_a = 0b1110_1100;
+        cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_eor_positive() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("EOR", AddressingMode::Immediate).unwrap().code;
+        let value = 0b1100_1010;
+        cpu.register_a = 0b1010_1010;
+        let expected = 0b0110_0000;
+        cpu.load_and_run(vec![code, value, 0]).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_eor_negative() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("EOR", AddressingMode::Immediate).unwrap().code;
+        let value = 0b0100_1010;
+        cpu.register_a = 0b1010_1010;
+        let expected = 0b1110_0000;
+        cpu.load_and_run(vec![code, value, 0]).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_eor_zero() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("EOR", AddressingMode::Immediate).unwrap().code;
+        let value = 0b0100_1010;
+        cpu.register_a = 0b0100_1010;
+        let expected = 0b0000_0000;
+        cpu.load_and_run(vec![code, value, 0]).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_ora_positive() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ORA", AddressingMode::Immediate).unwrap().code;
+        let value = 0b0100_1010;
+        cpu.register_a = 0b0110_1010;
+        let expected = 0b0110_1010;
+        cpu.load_and_run(vec![code, value, 0]).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_ora_negative() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ORA", AddressingMode::Immediate).unwrap().code;
+        let value = 0b0100_1010;
+        cpu.register_a = 0b1010_1001;
+        let expected = 0b1110_1011;
+        cpu.load_and_run(vec![code, value, 0]).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_ora_zero() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ORA", AddressingMode::Immediate).unwrap().code;
+        let value = 0b0000_0000;
+        cpu.register_a = 0b0000_0000;
+        let expected = 0b0000_0000;
+        cpu.load_and_run(vec![code, value, 0]).unwrap();
+        assert_eq!(cpu.register_a, expected);
         assert!(cpu.status.zero);
         assert!(!cpu.status.negative);
     }

@@ -116,6 +116,22 @@ impl CPU {
                 "TYA"  => {
                     instructions::tya(self);
                 }
+                // Logical
+                "AND" => {
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    let param = self.memory.read(param_address)?;
+                    instructions::and(self, param);
+                }
+                "EOR" => {
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    let param = self.memory.read(param_address)?;
+                    instructions::eor(self, param);
+                }
+                "ORA" => {
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    let param = self.memory.read(param_address)?;
+                    instructions::ora(self, param);
+                }
                 // Subroutine and Interrupt
                 "BRK" => {
                     instructions::brk(self);
