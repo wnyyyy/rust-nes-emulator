@@ -39,12 +39,13 @@ impl CPU {
     pub fn run(&mut self) -> Result<(), EmulatorError>{
         loop {
             let opcode_u8 = self.memory.read(self.program_counter)?;
-            let opcode= get_opcode(opcode_u8).ok_or(EmulatorError::InvalidOpcode(opcode_u8))?;
+            let opcode = get_opcode(opcode_u8).ok_or(EmulatorError::InvalidOpcode(opcode_u8))?;
             self.program_counter += 1;
+            let mut increase_pc = true;
 
             match opcode.name {
                 // Load and Store
-                "LDA" =>  {
+                "LDA" => {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
                     let param = self.memory.read(param_address)?;
                     instructions::lda(self, param);
@@ -104,16 +105,16 @@ impl CPU {
                     instructions::dey(self);
                 }
                 // Register Transfer
-                "TAX"  => {
+                "TAX" => {
                     instructions::tax(self);
                 }
-                "TAY"  => {
+                "TAY" => {
                     instructions::tay(self);
                 }
-                "TXA"  => {
+                "TXA" => {
                     instructions::txa(self);
                 }
-                "TYA"  => {
+                "TYA" => {
                     instructions::tya(self);
                 }
                 // Logical
@@ -157,8 +158,7 @@ impl CPU {
                 "ASL" => {
                     if opcode.address_mode == AddressingMode::Accumulator {
                         instructions::asl_accumulator(self);
-                    }
-                    else {
+                    } else {
                         let param_address = self.get_param_address(&opcode.address_mode)?;
                         instructions::asl(self, param_address)?;
                     }
@@ -166,8 +166,7 @@ impl CPU {
                 "LSR" => {
                     if opcode.address_mode == AddressingMode::Accumulator {
                         instructions::lsr_accumulator(self);
-                    }
-                    else {
+                    } else {
                         let param_address = self.get_param_address(&opcode.address_mode)?;
                         instructions::lsr(self, param_address)?;
                     }
@@ -175,8 +174,7 @@ impl CPU {
                 "ROL" => {
                     if opcode.address_mode == AddressingMode::Accumulator {
                         instructions::rol_accumulator(self);
-                    }
-                    else {
+                    } else {
                         let param_address = self.get_param_address(&opcode.address_mode)?;
                         instructions::rol(self, param_address)?;
                     }
@@ -184,11 +182,48 @@ impl CPU {
                 "ROR" => {
                     if opcode.address_mode == AddressingMode::Accumulator {
                         instructions::ror_accumulator(self);
-                    }
-                    else {
+                    } else {
                         let param_address = self.get_param_address(&opcode.address_mode)?;
                         instructions::ror(self, param_address)?;
                     }
+                }
+                // Jump and Branch
+                "JMP" => {
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    instructions::jmp(self, param_address);
+                    increase_pc = false;
+                }
+                "BCC" => {
+                    let offset = self.get_param_address(&opcode.address_mode)?;
+                    instructions::bcc(self, offset)?;
+                }
+                "BCS" => {
+                    let offset = self.get_param_address(&opcode.address_mode)?;
+                    instructions::bcs(self, offset)?;
+                }
+                "BEQ" => {
+                    let offset = self.get_param_address(&opcode.address_mode)?;
+                    instructions::beq(self, offset)?;
+                }
+                "BMI" => {
+                    let offset = self.get_param_address(&opcode.address_mode)?;
+                    instructions::bmi(self, offset)?;
+                }
+                "BNE" => {
+                    let offset = self.get_param_address(&opcode.address_mode)?;
+                    instructions::bne(self, offset)?;
+                }
+                "BPL" => {
+                    let offset = self.get_param_address(&opcode.address_mode)?;
+                    instructions::bpl(self, offset)?;
+                }
+                "BVC" => {
+                    let offset = self.get_param_address(&opcode.address_mode)?;
+                    instructions::bvc(self, offset)?;
+                }
+                "BVS" => {
+                    let offset = self.get_param_address(&opcode.address_mode)?;
+                    instructions::bvs(self, offset)?;
                 }
                 // Subroutine and Interrupt
                 "BRK" => {
@@ -197,7 +232,9 @@ impl CPU {
                 }
                 _ => return Err(EmulatorError::UnimplementedOpcode(opcode_u8)),
             }
-            self.program_counter += opcode.bytes as u16 - 1;
+            if increase_pc {
+                self.program_counter += opcode.bytes as u16 - 1;
+            }
         }
         Ok(())
     }
@@ -240,6 +277,10 @@ impl CPU {
             AddressingMode::IndirectIndexed => {
                 let address = self.memory.read(self.program_counter)?;
                 Ok(self.memory.read_little_endian(address as u16)?.wrapping_add(self.register_y as u16))
+            }
+            AddressingMode::Relative => {
+                let address = self.memory.read(self.program_counter)?;
+                Ok(address as u16)
             }
             _ => Err(EmulatorError::UnimplementedAddressingMode(format!("{:?}", mode))),
         }

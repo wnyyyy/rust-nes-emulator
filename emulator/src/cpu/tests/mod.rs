@@ -1,5 +1,6 @@
 #[cfg(test)]
 mod test {
+    use crate::common::constants::RAM_SIZE;
     use crate::cpu::opcode::get_opcode_by_name_and_address_mode;
     use super::super::*;
 
@@ -1250,6 +1251,333 @@ mod test {
         assert!(!cpu.status.zero);
         assert!(!cpu.status.negative);
         assert!(cpu.status.carry);
+    }
+
+    #[test]
+    fn test_jmp_absolute() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("JMP", AddressingMode::Absolute).unwrap().code;
+        let address = 0x1ABC;
+        cpu.load_and_run(vec![code, address as u8, (address >> 8) as u8, 0]).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, address + brk_bytes);
+    }
+
+    #[test]
+    fn test_jmp_indirect() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("JMP", AddressingMode::Indirect).unwrap().code;
+        let jump_address = 0x4EFF;
+        let address = 0x1ABC;
+        cpu.memory.write(address + 1, (jump_address >> 8) as u8).unwrap();
+        cpu.memory.write(address, jump_address as u8).unwrap();
+        cpu.load_and_run(vec![code, address as u8, (address >> 8) as u8, 0]).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, jump_address + brk_bytes);
+    }
+
+    #[test]
+    fn test_bcc_true() {
+        let mut cpu = initialize_cpu();
+        let opcode = get_opcode_by_name_and_address_mode("BCC", AddressingMode::Relative).unwrap();
+        let code = opcode.code;
+        cpu.program_counter += 0x0F;
+        let old_pc = cpu.program_counter;
+        let branch = 0x05;
+        let branch_address = 0x10;
+        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.status.carry = false;
+        let mut program = vec![0; 0x0F];
+        program.extend_from_slice(&[code, branch_address as u8, 0]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, old_pc + branch as u16 + opcode.bytes as u16 + brk_bytes);
+    }
+
+    #[test]
+    fn test_bcc_false() {
+        let mut cpu = initialize_cpu();
+        let opcode = get_opcode_by_name_and_address_mode("BCC", AddressingMode::Relative).unwrap();
+        let code = opcode.code;
+        cpu.program_counter += 0x0F;
+        let old_pc = cpu.program_counter;
+        let branch = 0x05;
+        let branch_address = 0x10;
+        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.status.carry = true;
+        let mut program = vec![0; 0x0F];
+        program.extend_from_slice(&[code, branch_address as u8, 0]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, old_pc + opcode.bytes as u16 + brk_bytes);
+    }
+
+    #[test]
+    fn test_bcs_true() {
+        let mut cpu = initialize_cpu();
+        let opcode = get_opcode_by_name_and_address_mode("BCS", AddressingMode::Relative).unwrap();
+        let code = opcode.code;
+        cpu.program_counter += 0x0F;
+        let old_pc = cpu.program_counter;
+        let branch = 0xFB;
+        let branch_address = 0x10;
+        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.status.carry = true;
+        let mut program = vec![0; 0x0F];
+        program.extend_from_slice(&[code, branch_address as u8, 0]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, old_pc + branch as u16 + opcode.bytes as u16 + brk_bytes);
+    }
+
+    #[test]
+    fn test_bcs_false() {
+        let mut cpu = initialize_cpu();
+        let opcode = get_opcode_by_name_and_address_mode("BCS", AddressingMode::Relative).unwrap();
+        let code = opcode.code;
+        cpu.program_counter += 0x0F;
+        let old_pc = cpu.program_counter;
+        let branch = 0xFB;
+        let branch_address = 0x10;
+        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.status.carry = false;
+        let mut program = vec![0; 0x0F];
+        program.extend_from_slice(&[code, branch_address as u8, 0]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, old_pc + opcode.bytes as u16 + brk_bytes);
+    }
+
+    #[test]
+    fn test_beq_true() {
+        let mut cpu = initialize_cpu();
+        let opcode = get_opcode_by_name_and_address_mode("BEQ", AddressingMode::Relative).unwrap();
+        let code = opcode.code;
+        cpu.program_counter += 0x0F;
+        let old_pc = cpu.program_counter;
+        let branch = 0x01;
+        let branch_address = 0x10;
+        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.status.zero = true;
+        let mut program = vec![0; 0x0F];
+        program.extend_from_slice(&[code, branch_address as u8, 0]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, old_pc + branch as u16 + opcode.bytes as u16 + brk_bytes);
+    }
+
+    #[test]
+    fn test_beq_false() {
+        let mut cpu = initialize_cpu();
+        let opcode = get_opcode_by_name_and_address_mode("BEQ", AddressingMode::Relative).unwrap();
+        let code = opcode.code;
+        cpu.program_counter += 0x0F;
+        let old_pc = cpu.program_counter;
+        let branch = 0x01;
+        let branch_address = 0x10;
+        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.status.zero = false;
+        let mut program = vec![0; 0x0F];
+        program.extend_from_slice(&[code, branch_address as u8, 0]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, old_pc + opcode.bytes as u16 + brk_bytes);
+    }
+
+    #[test]
+    fn test_bmi_true() {
+        let mut cpu = initialize_cpu();
+        let opcode = get_opcode_by_name_and_address_mode("BMI", AddressingMode::Relative).unwrap();
+        let code = opcode.code;
+        cpu.program_counter += 0x0F;
+        let old_pc = cpu.program_counter;
+        let branch = 0x81;
+        let branch_address = 0x10;
+        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.status.negative = true;
+        let mut program = vec![0; 0x0F];
+        program.extend_from_slice(&[code, branch_address as u8, 0]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, old_pc + branch as u16 + opcode.bytes as u16 + brk_bytes);
+    }
+
+    #[test]
+    fn test_bmi_false() {
+        let mut cpu = initialize_cpu();
+        let opcode = get_opcode_by_name_and_address_mode("BMI", AddressingMode::Relative).unwrap();
+        let code = opcode.code;
+        cpu.program_counter += 0x0F;
+        let old_pc = cpu.program_counter;
+        let branch = 0x81;
+        let branch_address = 0x10;
+        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.status.negative = false;
+        let mut program = vec![0; 0x0F];
+        program.extend_from_slice(&[code, branch_address as u8, 0]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, old_pc + opcode.bytes as u16 + brk_bytes);
+    }
+
+    #[test]
+    fn test_bne_true() {
+        let mut cpu = initialize_cpu();
+        let opcode = get_opcode_by_name_and_address_mode("BNE", AddressingMode::Relative).unwrap();
+        let code = opcode.code;
+        cpu.program_counter += 0x0F;
+        let old_pc = cpu.program_counter;
+        let branch = 0xAA;
+        let branch_address = 0x10;
+        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.status.zero = false;
+        let mut program = vec![0; 0x0F];
+        program.extend_from_slice(&[code, branch_address as u8, 0]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, old_pc + branch as u16 + opcode.bytes as u16 + brk_bytes);
+    }
+
+    #[test]
+    fn test_bne_false() {
+        let mut cpu = initialize_cpu();
+        let opcode = get_opcode_by_name_and_address_mode("BNE", AddressingMode::Relative).unwrap();
+        let code = opcode.code;
+        cpu.program_counter += 0x0F;
+        let old_pc = cpu.program_counter;
+        let branch = 0xAA;
+        let branch_address = 0x10;
+        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.status.zero = true;
+        let mut program = vec![0; 0x0F];
+        program.extend_from_slice(&[code, branch_address as u8, 0]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, old_pc + opcode.bytes as u16 + brk_bytes);
+    }
+
+    #[test]
+    fn test_bpl_true() {
+        let mut cpu = initialize_cpu();
+        let opcode = get_opcode_by_name_and_address_mode("BPL", AddressingMode::Relative).unwrap();
+        let code = opcode.code;
+        cpu.program_counter += 0x0F;
+        let old_pc = cpu.program_counter;
+        let branch = 0x79;
+        let branch_address = 0x10;
+        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.status.negative = false;
+        let mut program = vec![0; 0x0F];
+        program.extend_from_slice(&[code, branch_address as u8, 0]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, old_pc + branch as u16 + opcode.bytes as u16 + brk_bytes);
+    }
+
+    #[test]
+    fn test_bpl_false() {
+        let mut cpu = initialize_cpu();
+        let opcode = get_opcode_by_name_and_address_mode("BPL", AddressingMode::Relative).unwrap();
+        let code = opcode.code;
+        cpu.program_counter += 0x0F;
+        let old_pc = cpu.program_counter;
+        let branch = 0x79;
+        let branch_address = 0x10;
+        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.status.negative = true;
+        let mut program = vec![0; 0x0F];
+        program.extend_from_slice(&[code, branch_address as u8, 0]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, old_pc + opcode.bytes as u16 + brk_bytes);
+    }
+
+    #[test]
+    fn test_bvc_true() {
+        let mut cpu = initialize_cpu();
+        let opcode = get_opcode_by_name_and_address_mode("BVC", AddressingMode::Relative).unwrap();
+        let code = opcode.code;
+        cpu.program_counter += 0x0F;
+        let old_pc = cpu.program_counter;
+        let branch = 0xDD;
+        let branch_address = 0x10;
+        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.status.overflow = false;
+        let mut program = vec![0; 0x0F];
+        program.extend_from_slice(&[code, branch_address as u8, 0]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, old_pc + branch as u16 + opcode.bytes as u16 + brk_bytes);
+    }
+
+    #[test]
+    fn test_bvc_false() {
+        let mut cpu = initialize_cpu();
+        let opcode = get_opcode_by_name_and_address_mode("BVC", AddressingMode::Relative).unwrap();
+        let code = opcode.code;
+        cpu.program_counter += 0x0F;
+        let old_pc = cpu.program_counter;
+        let branch = 0xDD;
+        let branch_address = 0x10;
+        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.status.overflow = true;
+        let mut program = vec![0; 0x0F];
+        program.extend_from_slice(&[code, branch_address as u8, 0]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, old_pc + opcode.bytes as u16 + brk_bytes);
+    }
+
+    #[test]
+    fn test_bvs_true() {
+        let mut cpu = initialize_cpu();
+        let opcode = get_opcode_by_name_and_address_mode("BVS", AddressingMode::Relative).unwrap();
+        let code = opcode.code;
+        cpu.program_counter += 0x0F;
+        let old_pc = cpu.program_counter;
+        let branch = 0x04;
+        let branch_address = 0x10;
+        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.status.overflow = true;
+        let mut program = vec![0; 0x0F];
+        program.extend_from_slice(&[code, branch_address as u8, 0]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, old_pc + branch as u16 + opcode.bytes as u16 + brk_bytes);
+    }
+
+    #[test]
+    fn test_bvs_false() {
+        let mut cpu = initialize_cpu();
+        let opcode = get_opcode_by_name_and_address_mode("BVS", AddressingMode::Relative).unwrap();
+        let code = opcode.code;
+        cpu.program_counter += 0x0F;
+        let old_pc = cpu.program_counter;
+        let branch = 0x04;
+        let branch_address = 0x10;
+        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.status.overflow = false;
+        let mut program = vec![0; 0x0F];
+        program.extend_from_slice(&[code, branch_address as u8, 0]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, old_pc + opcode.bytes as u16 + brk_bytes);
     }
 
     #[test]

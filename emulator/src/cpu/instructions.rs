@@ -258,3 +258,71 @@ pub fn ror(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError>{
     cpu.status.negative = is_negative(result);
     Ok(())
 }
+
+pub fn jmp(cpu: &mut CPU, address: u16) {
+    cpu.program_counter = address;
+}
+
+pub fn bcc(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    if !cpu.status.carry {
+        let offset = cpu.memory.read(address)?;
+        cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
+    }
+    Ok(())
+}
+
+pub fn bcs(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    if cpu.status.carry {
+        let offset = cpu.memory.read(address)?;
+        cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
+    }
+    Ok(())
+}
+
+pub fn beq(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    if cpu.status.zero {
+        let offset = cpu.memory.read(address)?;
+        cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
+    }
+    Ok(())
+}
+
+pub fn bmi(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    if cpu.status.negative {
+        let offset = cpu.memory.read(address)?;
+        cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
+    }
+    Ok(())
+}
+
+pub fn bne(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    if !cpu.status.zero {
+        let offset = cpu.memory.read(address)?;
+        cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
+    }
+    Ok(())
+}
+
+pub fn bpl(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    if !cpu.status.negative {
+        let offset = cpu.memory.read(address)?;
+        cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
+    }
+    Ok(())
+}
+
+pub fn bvc(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    if !cpu.status.overflow {
+        let offset = cpu.memory.read(address)?;
+        cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
+    }
+    Ok(())
+}
+
+pub fn bvs(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    if cpu.status.overflow {
+        let offset = cpu.memory.read(address)?;
+        cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
+    }
+    Ok(())
+}
