@@ -1009,6 +1009,250 @@ mod test {
     }
 
     #[test]
+    fn test_asl_positive() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ASL", AddressingMode::Accumulator).unwrap().code;
+        cpu.register_a = 0b0010_0001;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0b0100_0010);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.carry);
+    }
+
+    #[test]
+    fn test_asl_zero() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ASL", AddressingMode::Accumulator).unwrap().code;
+        cpu.register_a = 0b1000_0000;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0b0000_0000);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.carry);
+    }
+
+    #[test]
+    fn test_asl_carry() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ASL", AddressingMode::Accumulator).unwrap().code;
+        cpu.register_a = 0b1000_0001;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0b0000_0010);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.carry);
+    }
+
+    #[test]
+    fn test_asl_negative() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ASL", AddressingMode::Accumulator).unwrap().code;
+        cpu.register_a = 0b0100_0001;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0b1000_0010);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.carry);
+    }
+
+    #[test]
+    fn test_asl_memory() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ASL", AddressingMode::ZeroPage).unwrap().code;
+        let address = 0x10;
+        let value = 0b0100_0001;
+        cpu.memory.write(address, value).unwrap();
+        cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
+        let store = cpu.memory.read(address).unwrap();
+        assert_eq!(store, 0b1000_0010);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.carry);
+    }
+
+    #[test]
+    fn test_lsr_positive() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("LSR", AddressingMode::Accumulator).unwrap().code;
+        cpu.register_a = 0b0010_1000;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0b0001_0100);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.carry);
+    }
+
+    #[test]
+    fn test_lsr_zero() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("LSR", AddressingMode::Accumulator).unwrap().code;
+        cpu.register_a = 0b0000_0001;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0b0000_0000);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.carry);
+    }
+
+    #[test]
+    fn test_lsr_carry() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("LSR", AddressingMode::Accumulator).unwrap().code;
+        cpu.register_a = 0b1000_0001;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0b0100_0000);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.carry);
+    }
+
+    #[test]
+    fn test_lsr_memory() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("LSR", AddressingMode::ZeroPage).unwrap().code;
+        let address = 0x10;
+        let value = 0b1000_0010;
+        cpu.memory.write(address, value).unwrap();
+        cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
+        let store = cpu.memory.read(address).unwrap();
+        assert_eq!(store, 0b0100_0001);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.carry);
+    }
+
+    #[test]
+    fn test_rol_positive() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ROL", AddressingMode::Accumulator).unwrap().code;
+        cpu.register_a = 0b0010_0001;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0b0100_0010);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.carry);
+    }
+
+    #[test]
+    fn test_rol_zero() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ROL", AddressingMode::Accumulator).unwrap().code;
+        cpu.register_a = 0b1000_0000;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0b0000_0000);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.carry);
+    }
+
+    #[test]
+    fn test_rol_carry() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ROL", AddressingMode::Accumulator).unwrap().code;
+        cpu.register_a = 0b1000_0001;
+        cpu.status.carry = true;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0b0000_0011);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.carry);
+    }
+
+    #[test]
+    fn test_rol_negative() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ROL", AddressingMode::Accumulator).unwrap().code;
+        cpu.register_a = 0b0100_0001;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0b1000_0010);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.carry);
+    }
+
+    #[test]
+    fn test_rol_memory() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ROL", AddressingMode::ZeroPage).unwrap().code;
+        let address = 0x10;
+        let value = 0b0100_0001;
+        cpu.status.carry = true;
+        cpu.memory.write(address, value).unwrap();
+        cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
+        let store = cpu.memory.read(address).unwrap();
+        assert_eq!(store, 0b1000_0011);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.carry);
+    }
+
+    #[test]
+    fn test_ror_positive() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ROR", AddressingMode::Accumulator).unwrap().code;
+        cpu.register_a = 0b0010_1000;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0b0001_0100);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.carry);
+    }
+
+    #[test]
+    fn test_ror_zero() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ROR", AddressingMode::Accumulator).unwrap().code;
+        cpu.register_a = 0b0000_0001;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0b0000_0000);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.carry);
+    }
+
+    #[test]
+    fn test_ror_negative() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ROR", AddressingMode::Accumulator).unwrap().code;
+        cpu.register_a = 0b0000_0100;
+        cpu.status.carry = true;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0b1000_0010);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.carry);
+    }
+
+    #[test]
+    fn test_ror_carry() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ROR", AddressingMode::Accumulator).unwrap().code;
+        cpu.register_a = 0b1000_0001;
+        cpu.status.carry = true;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, 0b1100_0000);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+        assert!(cpu.status.carry);
+    }
+
+    #[test]
+    fn test_ror_memory() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("ROR", AddressingMode::ZeroPage).unwrap().code;
+        let address = 0x10;
+        let value = 0b1000_0011;
+        cpu.memory.write(address, value).unwrap();
+        cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
+        let store = cpu.memory.read(address).unwrap();
+        assert_eq!(store, 0b0100_0001);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.carry);
+    }
+
+    #[test]
     fn test_brk_flag() {
         let mut cpu = initialize_cpu();
         let code = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().code;

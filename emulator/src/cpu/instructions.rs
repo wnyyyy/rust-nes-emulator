@@ -63,10 +63,10 @@ pub fn sbc(cpu: &mut CPU, param: u8) {
     cpu.status.overflow = overflows_negative(result as u16, old_a, param);
 }
 
-pub fn inc(cpu: &mut CPU, param: u16) -> Result<(), EmulatorError>{
-    let value = cpu.memory.read(param)?;
+pub fn inc(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError>{
+    let value = cpu.memory.read(address)?;
     let result = value.wrapping_add(1);
-    cpu.memory.write(param, result).unwrap();
+    cpu.memory.write(address, result).unwrap();
 
     cpu.status.zero = result == 0;
     cpu.status.negative = is_negative(result);
@@ -185,4 +185,76 @@ pub fn bit(cpu: &mut CPU, param: u8) {
     cpu.status.zero = cpu.register_a & param == 0;
     cpu.status.negative = is_negative(param);
     cpu.status.overflow = param & 0b0100_0000 != 0;
+}
+
+pub fn asl_accumulator(cpu: &mut CPU) {
+    cpu.status.carry = cpu.register_a & 0b1000_0000 != 0;
+    cpu.register_a = cpu.register_a.wrapping_shl(1);
+    cpu.status.zero = cpu.register_a == 0;
+    cpu.status.negative = is_negative(cpu.register_a);
+}
+
+pub fn asl(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError>{
+    let value = cpu.memory.read(address)?;
+    cpu.status.carry = value & 0b1000_0000 != 0;
+    let result = value.wrapping_shl(1);
+    cpu.memory.write(address, result)?;
+    cpu.status.zero = result == 0;
+    cpu.status.negative = is_negative(result);
+    Ok(())
+}
+
+pub fn lsr_accumulator(cpu: &mut CPU) {
+    cpu.status.carry = cpu.register_a & 0b0000_0001 != 0;
+    cpu.register_a = cpu.register_a.wrapping_shr(1);
+    cpu.status.zero = cpu.register_a == 0;
+    cpu.status.negative = false;
+}
+
+pub fn lsr(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError>{
+    let value = cpu.memory.read(address)?;
+    cpu.status.carry = value & 0b0000_0001 != 0;
+    let result = value.wrapping_shr(1);
+    cpu.memory.write(address, result)?;
+    cpu.status.zero = result == 0;
+    cpu.status.negative = false;
+    Ok(())
+}
+
+pub fn rol_accumulator(cpu: &mut CPU) {
+    let carry = if cpu.status.carry { 1 } else { 0 };
+    cpu.status.carry = cpu.register_a & 0b1000_0000 != 0;
+    cpu.register_a = cpu.register_a.wrapping_shl(1) | carry;
+    cpu.status.zero = cpu.register_a == 0;
+    cpu.status.negative = is_negative(cpu.register_a);
+}
+
+pub fn rol(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError>{
+    let value = cpu.memory.read(address)?;
+    let carry = if cpu.status.carry { 1 } else { 0 };
+    cpu.status.carry = value & 0b1000_0000 != 0;
+    let result = value.wrapping_shl(1) | carry;
+    cpu.memory.write(address, result)?;
+    cpu.status.zero = result == 0;
+    cpu.status.negative = is_negative(result);
+    Ok(())
+}
+
+pub fn ror_accumulator(cpu: &mut CPU) {
+    let carry = if cpu.status.carry { 0b1000_0000 } else { 0 };
+    cpu.status.carry = cpu.register_a & 0b0000_0001 != 0;
+    cpu.register_a = cpu.register_a.wrapping_shr(1) | carry;
+    cpu.status.zero = cpu.register_a == 0;
+    cpu.status.negative = is_negative(cpu.register_a);
+}
+
+pub fn ror(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError>{
+    let value = cpu.memory.read(address)?;
+    let carry = if cpu.status.carry { 0b1000_0000 } else { 0 };
+    cpu.status.carry = value & 0b0000_0001 != 0;
+    let result = value.wrapping_shr(1) | carry;
+    cpu.memory.write(address, result)?;
+    cpu.status.zero = result == 0;
+    cpu.status.negative = is_negative(result);
+    Ok(())
 }

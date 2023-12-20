@@ -153,6 +153,43 @@ impl CPU {
                     let param = self.memory.read(param_address)?;
                     instructions::bit(self, param);
                 }
+                // Shift and Rotate
+                "ASL" => {
+                    if opcode.address_mode == AddressingMode::Accumulator {
+                        instructions::asl_accumulator(self);
+                    }
+                    else {
+                        let param_address = self.get_param_address(&opcode.address_mode)?;
+                        instructions::asl(self, param_address)?;
+                    }
+                }
+                "LSR" => {
+                    if opcode.address_mode == AddressingMode::Accumulator {
+                        instructions::lsr_accumulator(self);
+                    }
+                    else {
+                        let param_address = self.get_param_address(&opcode.address_mode)?;
+                        instructions::lsr(self, param_address)?;
+                    }
+                }
+                "ROL" => {
+                    if opcode.address_mode == AddressingMode::Accumulator {
+                        instructions::rol_accumulator(self);
+                    }
+                    else {
+                        let param_address = self.get_param_address(&opcode.address_mode)?;
+                        instructions::rol(self, param_address)?;
+                    }
+                }
+                "ROR" => {
+                    if opcode.address_mode == AddressingMode::Accumulator {
+                        instructions::ror_accumulator(self);
+                    }
+                    else {
+                        let param_address = self.get_param_address(&opcode.address_mode)?;
+                        instructions::ror(self, param_address)?;
+                    }
+                }
                 // Subroutine and Interrupt
                 "BRK" => {
                     instructions::brk(self);
