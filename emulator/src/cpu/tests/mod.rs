@@ -1781,6 +1781,46 @@ mod test {
     }
 
     #[test]
+    fn test_jsr() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("JSR", AddressingMode::Absolute).unwrap().code;
+        cpu.program_counter += 0x0200;
+        cpu.stack_pointer = 0xFF;
+        let target_address = 0x1ABC;
+        let return_address = cpu.program_counter + 2;
+        let mut program = vec![0; 0x0200];
+        program.extend_from_slice(&[code, target_address as u8, (target_address >> 8) as u8]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.program_counter, target_address + brk_bytes);
+        assert_eq!(cpu.stack_pointer, 0xFD);
+        let high_byte = cpu.memory.read(0x01FF).unwrap();
+        let low_byte = cpu.memory.read(0x01FE).unwrap();
+        let pushed_address = (high_byte as u16) << 8 | low_byte as u16;
+        assert_eq!(pushed_address, return_address);
+    }
+
+    #[test]
+    fn test_rts() {
+        let mut cpu = initialize_cpu();
+        let rts = get_opcode_by_name_and_address_mode("RTS", AddressingMode::Implied).unwrap().code;
+        let jsr = get_opcode_by_name_and_address_mode("JSR", AddressingMode::Absolute).unwrap();
+        cpu.program_counter += 0x0200;
+        let initial_pc = cpu.program_counter;
+        cpu.stack_pointer = 0xFF;
+        let target_address = 0x1ABC;
+        cpu.memory.write(0x1ABC, rts).unwrap();
+        let mut program = vec![0; 0x0200];
+        program.extend_from_slice(&[jsr.code, target_address as u8, (target_address >> 8) as u8]);
+        program.extend_from_slice(&[0; RAM_SIZE as usize]);
+        cpu.load_and_run(program).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        let jsr_bytes = jsr.bytes as u16;
+        assert_eq!(cpu.program_counter, initial_pc + jsr_bytes + brk_bytes);
+    }
+
+    #[test]
     fn test_brk_flag() {
         let mut cpu = initialize_cpu();
         let code = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().code;

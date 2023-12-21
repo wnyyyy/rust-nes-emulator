@@ -389,3 +389,28 @@ pub fn sec(cpu: &mut CPU) {
 pub fn sei(cpu: &mut CPU) {
     cpu.status.interrupt_disable = true;
 }
+
+pub fn jsr(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    let return_address = cpu.program_counter + 2;
+    let return_address_low = (return_address & 0x00FF) as u8;
+    let return_address_high = ((return_address & 0xFF00) >> 8) as u8;
+
+    let sp_address = cpu.stack_pointer as u16 + STACK_START;
+    cpu.memory.write(sp_address, return_address_high)?;
+    cpu.stack_pointer = cpu.stack_pointer.wrapping_sub(1);
+    cpu.memory.write(cpu.stack_pointer as u16 + STACK_START, return_address_low)?;
+    cpu.stack_pointer = cpu.stack_pointer.wrapping_sub(1);
+
+    cpu.program_counter = address;
+    Ok(())
+}
+
+pub fn rts(cpu: &mut CPU) -> Result<(), EmulatorError> {
+    cpu.stack_pointer = cpu.stack_pointer.wrapping_add(1);
+    let sp_address = cpu.stack_pointer as u16 + STACK_START;
+    let return_address_low = cpu.memory.read(sp_address)?;
+    cpu.stack_pointer = cpu.stack_pointer.wrapping_add(1);
+    let return_address_high = cpu.memory.read(cpu.stack_pointer as u16 + STACK_START)?;
+    cpu.program_counter = u16::from_le_bytes([return_address_low, return_address_high]);
+    Ok(())
+}

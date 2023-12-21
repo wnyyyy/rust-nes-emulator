@@ -263,6 +263,14 @@ impl CPU {
                     instructions::sei(self);
                 }
                 // Subroutine and Interrupt
+                "JSR" => {
+                    let address = self.get_param_address(&opcode.address_mode)?;
+                    instructions::jsr(self, address)?;
+                    increase_pc = false;
+                }
+                "RTS" => {
+                    instructions::rts(self)?;
+                }
                 "BRK" => {
                     instructions::brk(self);
                     self.program_counter += opcode.bytes as u16;
