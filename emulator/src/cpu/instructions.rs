@@ -369,3 +369,23 @@ pub fn plp(cpu: &mut CPU) -> Result<(), EmulatorError> {
     cpu.status = ProcessorStatus::from_u8(status_bits);
     Ok(())
 }
+
+pub fn clc(cpu: &mut CPU) {
+    cpu.status.carry = false;
+}
+
+pub fn cli(cpu: &mut CPU) {
+    cpu.status.interrupt_disable = false;
+}
+
+pub fn clv(cpu: &mut CPU) {
+    cpu.status.overflow = false;
+}
+
+pub fn sec(cpu: &mut CPU) {
+    cpu.status.carry = true;
+}
+
+pub fn sei(cpu: &mut CPU) {
+    cpu.status.interrupt_disable = true;
+}

@@ -245,6 +245,24 @@ impl CPU {
                 "PLP" => {
                     instructions::plp(self)?;
                 }
+                // Status Flag Changes
+                "CLC" => {
+                    instructions::clc(self);
+                }
+                "CLD" => {}
+                "CLI" => {
+                    instructions::cli(self);
+                }
+                "CLV" => {
+                    instructions::clv(self);
+                }
+                "SEC" => {
+                    instructions::sec(self);
+                }
+                "SED" => {}
+                "SEI" => {
+                    instructions::sei(self);
+                }
                 // Subroutine and Interrupt
                 "BRK" => {
                     instructions::brk(self);

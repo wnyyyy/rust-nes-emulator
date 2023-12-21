@@ -1738,6 +1738,49 @@ mod test {
     }
 
     #[test]
+    fn test_clc() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("CLC", AddressingMode::Implied).unwrap().code;
+        cpu.status.carry = true;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert!(!cpu.status.carry);
+    }
+
+    #[test]
+    fn test_cli() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("CLI", AddressingMode::Implied).unwrap().code;
+        cpu.status.interrupt_disable = true;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert!(!cpu.status.interrupt_disable);
+    }
+
+    #[test]
+    fn test_clv() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("CLV", AddressingMode::Implied).unwrap().code;
+        cpu.status.overflow = true;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert!(!cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_sec() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("SEC", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert!(cpu.status.carry);
+    }
+
+    #[test]
+    fn test_sei() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("SEI", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert!(cpu.status.interrupt_disable);
+    }
+
+    #[test]
     fn test_brk_flag() {
         let mut cpu = initialize_cpu();
         let code = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().code;
