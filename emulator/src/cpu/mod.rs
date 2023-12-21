@@ -41,7 +41,6 @@ impl CPU {
         loop {
             let opcode_u8 = self.memory.read(self.program_counter)?;
             let opcode = get_opcode(opcode_u8).ok_or(EmulatorError::InvalidOpcode(opcode_u8))?;
-            self.program_counter += 1;
             let mut increase_pc = true;
 
             match opcode.name {
@@ -190,8 +189,8 @@ impl CPU {
                 }
                 // Jump and Branch
                 "JMP" => {
-                    let param_address = self.get_param_address(&opcode.address_mode)?;
-                    instructions::jmp(self, param_address);
+                    let address = self.get_param_address(&opcode.address_mode)?;
+                    instructions::jmp(self, address);
                     increase_pc = false;
                 }
                 "BCC" => {
@@ -266,58 +265,60 @@ impl CPU {
                 // Subroutine and Interrupt
                 "BRK" => {
                     instructions::brk(self);
+                    self.program_counter += opcode.bytes as u16;
                     break;
                 }
                 _ => return Err(EmulatorError::UnimplementedOpcode(opcode_u8)),
             }
             if increase_pc {
-                self.program_counter += opcode.bytes as u16 - 1;
+                self.program_counter += opcode.bytes as u16;
             }
         }
         Ok(())
     }
 
     fn get_param_address(&self, mode: &AddressingMode) -> Result<u16, EmulatorError> {
+        let param = self.program_counter + 1;
         match mode {
-            AddressingMode::Immediate => Ok(self.program_counter),
+            AddressingMode::Immediate => Ok(param),
             AddressingMode::ZeroPage => {
-                let address = self.memory.read(self.program_counter)?;
+                let address = self.memory.read(param)?;
                 Ok(address as u16)
             }
             AddressingMode::ZeroPageX => {
-                let address = self.memory.read(self.program_counter)?;
+                let address = self.memory.read(param)?;
                 Ok((address.wrapping_add(self.register_x)) as u16)
             }
             AddressingMode::ZeroPageY => {
-                let address = self.memory.read(self.program_counter)?;
+                let address = self.memory.read(param)?;
                 Ok((address.wrapping_add(self.register_y)) as u16)
             }
             AddressingMode::Absolute => {
-                let address = self.memory.read_little_endian(self.program_counter)?;
+                let address = self.memory.read_little_endian(param)?;
                 Ok(address)
             }
             AddressingMode::AbsoluteX => {
-                let address = self.memory.read_little_endian(self.program_counter)?;
+                let address = self.memory.read_little_endian(param)?;
                 Ok(address.wrapping_add(self.register_x as u16))
             }
             AddressingMode::AbsoluteY => {
-                let address = self.memory.read_little_endian(self.program_counter)?;
+                let address = self.memory.read_little_endian(param)?;
                 Ok(address.wrapping_add(self.register_y as u16))
             }
             AddressingMode::Indirect => {
-                let address = self.memory.read_little_endian(self.program_counter)?;
+                let address = self.memory.read_little_endian(param)?;
                 Ok(self.memory.read_little_endian(address)?)
             }
             AddressingMode::IndexedIndirect => {
-                let address = self.memory.read(self.program_counter)?.wrapping_add(self.register_x);
+                let address = self.memory.read(param)?.wrapping_add(self.register_x);
                 Ok(self.memory.read_little_endian(address as u16)?)
             }
             AddressingMode::IndirectIndexed => {
-                let address = self.memory.read(self.program_counter)?;
+                let address = self.memory.read(param)?;
                 Ok(self.memory.read_little_endian(address as u16)?.wrapping_add(self.register_y as u16))
             }
             AddressingMode::Relative => {
-                let address = self.memory.read(self.program_counter)?;
+                let address = self.memory.read(param)?;
                 Ok(address as u16)
             }
             _ => Err(EmulatorError::UnimplementedAddressingMode(format!("{:?}", mode))),
