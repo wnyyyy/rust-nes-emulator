@@ -1,3 +1,4 @@
+use crate::common::constants::STACK_POINTER_INIT;
 use crate::common::errors::EmulatorError;
 use crate::cpu::opcode::{get_opcode};
 use crate::cpu::types::{AddressingMode, ProcessorStatus};
@@ -22,7 +23,7 @@ impl CPU {
     pub fn new() -> CPU {
         CPU {
             program_counter: 0,
-            stack_pointer: 0xFF,
+            stack_pointer: STACK_POINTER_INIT,
             register_a: 0,
             register_x: 0,
             register_y: 0,
@@ -231,6 +232,18 @@ impl CPU {
                 }
                 "TXS" => {
                     instructions::txs(self);
+                }
+                "PHA" => {
+                    instructions::pha(self)?;
+                }
+                "PHP" => {
+                    instructions::php(self)?;
+                }
+                "PLA" => {
+                    instructions::pla(self)?;
+                }
+                "PLP" => {
+                    instructions::plp(self)?;
                 }
                 // Subroutine and Interrupt
                 "BRK" => {

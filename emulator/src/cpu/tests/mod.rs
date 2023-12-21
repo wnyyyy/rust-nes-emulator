@@ -1624,7 +1624,117 @@ mod test {
 
     #[test]
     fn test_pha() {
+        let mut cpu = initialize_cpu();
+        cpu.register_a = 0xAA;
+        let address = STACK_POINTER_INIT as u16 + 0x0100;
+        let code = get_opcode_by_name_and_address_mode("PHA", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.memory.read(address).unwrap(), 0xAA);
+        assert_eq!(cpu.stack_pointer, STACK_POINTER_INIT - 1);
+    }
 
+    #[test]
+    fn test_pha_wrapping() {
+        let mut cpu = initialize_cpu();
+        cpu.register_a = 0xAA;
+        cpu.stack_pointer = 0x00;
+        let address = 0x0100;
+        let code = get_opcode_by_name_and_address_mode("PHA", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.memory.read(address).unwrap(), 0xAA);
+        assert_eq!(cpu.stack_pointer, STACK_POINTER_INIT);
+    }
+
+    #[test]
+    fn test_php() {
+        let mut cpu = initialize_cpu();
+        let status = ProcessorStatus::from_u8(0b1000_1010);
+        cpu.status = status;
+        let address = STACK_POINTER_INIT as u16 + 0x0100;
+        let code = get_opcode_by_name_and_address_mode("PHP", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.memory.read(address).unwrap(), status.to_u8());
+        assert_eq!(cpu.stack_pointer, STACK_POINTER_INIT - 1);
+    }
+
+    #[test]
+    fn test_php_wrapping() {
+        let mut cpu = initialize_cpu();
+        let status = ProcessorStatus::from_u8(0b1000_1010);
+        cpu.status = status;
+        cpu.stack_pointer = 0x00;
+        let address = 0x0100;
+        let code = get_opcode_by_name_and_address_mode("PHP", AddressingMode::Implied).unwrap().code;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.memory.read(address).unwrap(), status.to_u8());
+        assert_eq!(cpu.stack_pointer, STACK_POINTER_INIT);
+    }
+
+    #[test]
+    fn test_pla_positive() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("PLA", AddressingMode::Implied).unwrap().code;
+        let test_offset = 0x10;
+        let test_value = 0x03;
+        let address = STACK_POINTER_INIT as u16 + 0x0100 - test_offset;
+        cpu.memory.write(address, test_value).unwrap();
+        cpu.stack_pointer -= test_offset as u8 + 1;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, test_value);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_pla_negative() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("PLA", AddressingMode::Implied).unwrap().code;
+        let test_offset = 0xFF;
+        let test_value = 0xF0;
+        let address = STACK_POINTER_INIT as u16 + 0x0100 - test_offset;
+        cpu.memory.write(address, test_value).unwrap();
+        cpu.stack_pointer = (cpu.stack_pointer - test_offset as u8).wrapping_sub(1);
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, test_value);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_pla_zero() {
+        let mut cpu = initialize_cpu();
+        cpu.register_a = 0x01;
+        let code = get_opcode_by_name_and_address_mode("PLA", AddressingMode::Implied).unwrap().code;
+        let test_offset = 0x00;
+        let test_value = 0;
+        let address = STACK_POINTER_INIT as u16 + 0x0100 + test_offset;
+        cpu.memory.write(address, test_value).unwrap();
+        cpu.stack_pointer = STACK_POINTER_INIT - 1;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        assert_eq!(cpu.register_a, test_value);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_plp() {
+        let mut cpu = initialize_cpu();
+        let code = get_opcode_by_name_and_address_mode("PLP", AddressingMode::Implied).unwrap().code;
+        let test_offset = 0x10;
+        let mut status = ProcessorStatus::new();
+        status.zero = true;
+        status.negative = true;
+        status.overflow = true;
+        status.carry = true;
+        status.break_command = true;
+        status.interrupt_disable = true;
+        let test_value = status.to_u8();
+        let address = STACK_POINTER_INIT as u16 + 0x0100 - test_offset;
+        cpu.memory.write(address, test_value).unwrap();
+        cpu.stack_pointer -= test_offset as u8 + 1;
+        cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        let new = cpu.status.to_u8();
+        assert_eq!(new, test_value);
     }
 
     #[test]

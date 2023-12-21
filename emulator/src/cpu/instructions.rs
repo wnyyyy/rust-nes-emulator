@@ -1,6 +1,8 @@
+use crate::common::constants::STACK_START;
 use crate::common::errors::EmulatorError;
 use crate::common::util::{is_negative, overflows_negative, overflows_positive};
 use crate::cpu::CPU;
+use crate::cpu::types::ProcessorStatus;
 
 pub fn brk(cpu: &mut CPU) {
     cpu.status.break_command = true;
@@ -335,4 +337,35 @@ pub fn tsx(cpu: &mut CPU) {
 
 pub fn txs(cpu: &mut CPU) {
     cpu.stack_pointer = cpu.register_x;
+}
+
+pub fn pha(cpu: &mut CPU) -> Result<(), EmulatorError> {
+    let sp_address = cpu.stack_pointer as u16 + STACK_START;
+    cpu.memory.write(sp_address, cpu.register_a)?;
+    cpu.stack_pointer = cpu.stack_pointer.wrapping_sub(1);
+    Ok(())
+}
+
+pub fn php(cpu: &mut CPU) -> Result<(), EmulatorError> {
+    let sp_address = cpu.stack_pointer as u16 + STACK_START;
+    cpu.memory.write(sp_address, cpu.status.to_u8())?;
+    cpu.stack_pointer = cpu.stack_pointer.wrapping_sub(1);
+    Ok(())
+}
+
+pub fn pla(cpu: &mut CPU) -> Result<(), EmulatorError> {
+    cpu.stack_pointer = cpu.stack_pointer.wrapping_add(1);
+    let sp_address = cpu.stack_pointer as u16 + STACK_START;
+    cpu.register_a = cpu.memory.read(sp_address)?;
+    cpu.status.zero = cpu.register_a == 0;
+    cpu.status.negative = is_negative(cpu.register_a);
+    Ok(())
+}
+
+pub fn plp(cpu: &mut CPU) -> Result<(), EmulatorError> {
+    cpu.stack_pointer = cpu.stack_pointer.wrapping_add(1);
+    let sp_address = cpu.stack_pointer as u16 + STACK_START;
+    let status_bits = cpu.memory.read(sp_address)?;
+    cpu.status = ProcessorStatus::from_u8(status_bits);
+    Ok(())
 }

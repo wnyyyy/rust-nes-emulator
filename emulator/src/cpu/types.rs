@@ -1,3 +1,4 @@
+#[derive(Debug, Clone, Copy)]
 pub struct ProcessorStatus {
     pub carry: bool,
     pub zero: bool,
@@ -16,6 +17,40 @@ impl ProcessorStatus {
             break_command: false,
             overflow: false,
             negative: false,
+        }
+    }
+
+    pub fn to_u8(&self) -> u8 {
+        let mut status = 0b0000_0000;
+        if self.carry {
+            status |= 0b0000_0001;
+        }
+        if self.zero {
+            status |= 0b0000_0010;
+        }
+        if self.interrupt_disable {
+            status |= 0b0000_0100;
+        }
+        if self.break_command {
+            status |= 0b0001_0000;
+        }
+        if self.overflow {
+            status |= 0b0100_0000;
+        }
+        if self.negative {
+            status |= 0b1000_0000;
+        }
+        status
+    }
+
+    pub fn from_u8(status: u8) -> ProcessorStatus {
+        ProcessorStatus {
+            carry: status & 0b0000_0001 != 0,
+            zero: status & 0b0000_0010 != 0,
+            interrupt_disable: status & 0b0000_0100 != 0,
+            break_command: status & 0b0001_0000 != 0,
+            overflow: status & 0b0100_0000 != 0,
+            negative: status & 0b1000_0000 != 0,
         }
     }
 }
