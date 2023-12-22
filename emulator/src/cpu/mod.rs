@@ -10,6 +10,7 @@ mod tests;
 pub mod opcode;
 
 pub struct CPU {
+    debug: bool,
     program_counter: u16,
     stack_pointer: u8,
     register_a: u8,
@@ -22,6 +23,7 @@ pub struct CPU {
 impl CPU {
     pub fn new() -> CPU {
         CPU {
+            debug: false,
             program_counter: 0,
             stack_pointer: STACK_POINTER_INIT,
             register_a: 0,
@@ -272,7 +274,12 @@ impl CPU {
                     instructions::rts(self)?;
                 }
                 "BRK" => {
-                    instructions::brk(self)?;
+                    if !self.debug {
+                        instructions::brk(self)?;
+                    }
+                    else {
+                        self.program_counter += opcode.bytes as u16;
+                    }
                     break;
                 }
                 "RTI" => {

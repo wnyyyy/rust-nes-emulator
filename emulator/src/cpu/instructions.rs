@@ -341,7 +341,8 @@ pub fn pha(cpu: &mut CPU) -> Result<(), EmulatorError> {
 }
 
 pub fn php(cpu: &mut CPU) -> Result<(), EmulatorError> {
-    stack_push(cpu, cpu.status.to_u8())?;
+    let status = cpu.status.to_u8() | 0b0001_0000;
+    stack_push(cpu, status)?;
     Ok(())
 }
 
@@ -355,6 +356,7 @@ pub fn pla(cpu: &mut CPU) -> Result<(), EmulatorError> {
 pub fn plp(cpu: &mut CPU) -> Result<(), EmulatorError> {
     let status_bits = stack_pop(cpu)?;
     cpu.status = ProcessorStatus::from_u8(status_bits);
+    cpu.status.break_command = false;
     Ok(())
 }
 
@@ -403,15 +405,16 @@ pub fn rti(cpu: &mut CPU) -> Result<(), EmulatorError> {
     let return_address_high = stack_pop(cpu)?;
     cpu.program_counter = u16::from_le_bytes([return_address_low, return_address_high]);
     cpu.status = ProcessorStatus::from_u8(status_bits);
+    cpu.status.break_command = false;
     Ok(())
 }
 
 pub fn brk(cpu: &mut CPU) -> Result<(), EmulatorError> {
     stack_push(cpu, (cpu.program_counter >> 8) as u8)?;
     stack_push(cpu, cpu.program_counter as u8)?;
-    stack_push(cpu, cpu.status.to_u8())?;
+    let status = cpu.status.to_u8() | 0b0001_0000;
+    stack_push(cpu, status)?;
     cpu.program_counter = cpu.memory.read_little_endian(0xFFFE)?;
-    cpu.status.break_command = true;
     Ok(())
 }
 

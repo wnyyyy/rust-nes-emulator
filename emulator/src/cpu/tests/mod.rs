@@ -6,6 +6,7 @@ mod test {
 
     fn initialize_cpu() -> CPU {
         let mut cpu = CPU::new();
+        cpu.debug = true;
         cpu.program_counter = 0x8000;
         cpu
     }
@@ -1653,7 +1654,7 @@ mod test {
         let address = STACK_POINTER_INIT as u16 + 0x0100;
         let code = get_opcode_by_name_and_address_mode("PHP", AddressingMode::Implied).unwrap().code;
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
-        assert_eq!(cpu.memory.read(address).unwrap(), status.to_u8());
+        assert_eq!(cpu.memory.read(address).unwrap(), status.to_u8() | 0b0001_0000);
         assert_eq!(cpu.stack_pointer, STACK_POINTER_INIT - 1);
     }
 
@@ -1666,7 +1667,7 @@ mod test {
         let address = 0x0100;
         let code = get_opcode_by_name_and_address_mode("PHP", AddressingMode::Implied).unwrap().code;
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
-        assert_eq!(cpu.memory.read(address).unwrap(), status.to_u8());
+        assert_eq!(cpu.memory.read(address).unwrap(), status.to_u8() | 0b0001_0000);
         assert_eq!(cpu.stack_pointer, STACK_POINTER_INIT);
     }
 
@@ -1726,7 +1727,6 @@ mod test {
         status.negative = true;
         status.overflow = true;
         status.carry = true;
-        status.break_command = true;
         status.interrupt_disable = true;
         let test_value = status.to_u8();
         let address = STACK_POINTER_INIT as u16 + 0x0100 - test_offset;
@@ -1826,10 +1826,10 @@ mod test {
         let rti = get_opcode_by_name_and_address_mode("RTI", AddressingMode::Implied).unwrap().code;
         cpu.stack_pointer = 0xFC;
         cpu.status = ProcessorStatus::from_u8(0b0000_0000);
-        let return_status = ProcessorStatus::from_u8(0b1001_0011);
+        let return_status = ProcessorStatus::from_u8(0b1000_0011);
         let return_status_u8 = return_status.to_u8();
         let return_address = 0x1ABC;
-        cpu.memory.write(0x01FD, return_status_u8).unwrap();
+        cpu.memory.write(0x01FD, return_status_u8 | 0b0001_0000).unwrap();
         cpu.memory.write(0x01FE, return_address as u8).unwrap();
         cpu.memory.write(0x01FF, (return_address >> 8) as u8).unwrap();
         cpu.load_and_run(vec![rti, 0, 0]).unwrap();
@@ -1841,6 +1841,7 @@ mod test {
     #[test]
     fn test_brk() {
         let mut cpu = initialize_cpu();
+        cpu.debug = false;
         cpu.program_counter += 0x0200;
         cpu.stack_pointer = 0x05;
         cpu.status = ProcessorStatus::from_u8(0b1000_0001);
@@ -1848,20 +1849,15 @@ mod test {
         let initial_status = cpu.status.to_u8();
         cpu.memory.write(0xFFFE, 0xBC).unwrap();
         cpu.memory.write(0xFFFF, 0x1A).unwrap();
-        cpu.memory.write(0x1003, initial_status).unwrap();
-        cpu.memory.write(0x1004, initial_pc as u8).unwrap();
-        cpu.memory.write(0x1005, (initial_pc >> 8) as u8).unwrap();
         let code = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().code;
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
-        let stored_status = cpu.memory.read(0x1003).unwrap();
-        let stored_pc_low = cpu.memory.read(0x1004).unwrap();
-        let stored_pc_high = cpu.memory.read(0x1005).unwrap();
+        let stored_status = cpu.memory.read(0x0103).unwrap();
+        let stored_pc_low = cpu.memory.read(0x0104).unwrap();
+        let stored_pc_high = cpu.memory.read(0x0105).unwrap();
         let stored_pc = (stored_pc_high as u16) << 8 | stored_pc_low as u16;
-        assert!(cpu.status.break_command);
-        assert_eq!(cpu.status.to_u8(), initial_status | 0b0001_0000);
         assert_eq!(cpu.stack_pointer, 0x02);
         assert_eq!(cpu.program_counter, 0x1ABC);
-        assert_eq!(stored_status, initial_status);
+        assert_eq!(stored_status, initial_status | 0b0001_0000);
         assert_eq!(stored_pc, initial_pc);
     }
 }
