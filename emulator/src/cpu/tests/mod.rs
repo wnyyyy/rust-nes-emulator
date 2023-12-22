@@ -1839,10 +1839,29 @@ mod test {
     }
 
     #[test]
-    fn test_brk_flag() {
+    fn test_brk() {
         let mut cpu = initialize_cpu();
+        cpu.program_counter += 0x0200;
+        cpu.stack_pointer = 0x05;
+        cpu.status = ProcessorStatus::from_u8(0b1000_0001);
+        let initial_pc = cpu.program_counter;
+        let initial_status = cpu.status.to_u8();
+        cpu.memory.write(0xFFFE, 0xBC).unwrap();
+        cpu.memory.write(0xFFFF, 0x1A).unwrap();
+        cpu.memory.write(0x1003, initial_status).unwrap();
+        cpu.memory.write(0x1004, initial_pc as u8).unwrap();
+        cpu.memory.write(0x1005, (initial_pc >> 8) as u8).unwrap();
         let code = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().code;
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
+        let stored_status = cpu.memory.read(0x1003).unwrap();
+        let stored_pc_low = cpu.memory.read(0x1004).unwrap();
+        let stored_pc_high = cpu.memory.read(0x1005).unwrap();
+        let stored_pc = (stored_pc_high as u16) << 8 | stored_pc_low as u16;
         assert!(cpu.status.break_command);
+        assert_eq!(cpu.status.to_u8(), initial_status | 0b0001_0000);
+        assert_eq!(cpu.stack_pointer, 0x02);
+        assert_eq!(cpu.program_counter, 0x1ABC);
+        assert_eq!(stored_status, initial_status);
+        assert_eq!(stored_pc, initial_pc);
     }
 }

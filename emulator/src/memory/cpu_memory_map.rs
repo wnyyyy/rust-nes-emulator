@@ -2,13 +2,13 @@ use crate::common::constants::{RAM_SIZE, MEMORY_SIZE};
 use crate::common::errors::EmulatorError;
 
 pub struct CpuMemoryMap {
-    memory: [u8; MEMORY_SIZE as usize],
+    memory: [u8; MEMORY_SIZE],
 }
 
 impl CpuMemoryMap {
     pub fn new() -> CpuMemoryMap {
         CpuMemoryMap {
-            memory: [0; MEMORY_SIZE as usize],
+            memory: [0; MEMORY_SIZE],
         }
     }
 

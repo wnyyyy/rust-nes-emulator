@@ -4,10 +4,6 @@ use crate::common::util::{is_negative, overflows_negative, overflows_positive};
 use crate::cpu::CPU;
 use crate::cpu::types::ProcessorStatus;
 
-pub fn brk(cpu: &mut CPU) {
-    cpu.status.break_command = true;
-}
-
 pub fn lda(cpu: &mut CPU, param: u8) {
     cpu.register_a = param;
 
@@ -407,6 +403,15 @@ pub fn rti(cpu: &mut CPU) -> Result<(), EmulatorError> {
     let return_address_high = stack_pop(cpu)?;
     cpu.program_counter = u16::from_le_bytes([return_address_low, return_address_high]);
     cpu.status = ProcessorStatus::from_u8(status_bits);
+    Ok(())
+}
+
+pub fn brk(cpu: &mut CPU) -> Result<(), EmulatorError> {
+    stack_push(cpu, (cpu.program_counter >> 8) as u8)?;
+    stack_push(cpu, cpu.program_counter as u8)?;
+    stack_push(cpu, cpu.status.to_u8())?;
+    cpu.program_counter = cpu.memory.read_little_endian(0xFFFE)?;
+    cpu.status.break_command = true;
     Ok(())
 }
 

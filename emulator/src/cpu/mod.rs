@@ -271,15 +271,15 @@ impl CPU {
                 "RTS" => {
                     instructions::rts(self)?;
                 }
+                "BRK" => {
+                    instructions::brk(self)?;
+                    break;
+                }
                 "RTI" => {
                     instructions::rti(self)?;
                     increase_pc = false;
                 }
-                "BRK" => {
-                    instructions::brk(self);
-                    self.program_counter += opcode.bytes as u16;
-                    break;
-                }
+                "NOP" => {}
                 _ => return Err(EmulatorError::UnimplementedOpcode(opcode_u8)),
             }
             if increase_pc {
