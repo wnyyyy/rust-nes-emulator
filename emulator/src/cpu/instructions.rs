@@ -414,3 +414,25 @@ pub fn rts(cpu: &mut CPU) -> Result<(), EmulatorError> {
     cpu.program_counter = u16::from_le_bytes([return_address_low, return_address_high]);
     Ok(())
 }
+
+pub fn rti(cpu: &mut CPU) -> Result<(), EmulatorError> {
+    let status_bits = stack_pop(cpu)?;
+    let return_address_low = stack_pop(cpu)?;
+    let return_address_high = stack_pop(cpu)?;
+    cpu.program_counter = u16::from_le_bytes([return_address_low, return_address_high]);
+    cpu.status = ProcessorStatus::from_u8(status_bits);
+    Ok(())
+}
+
+fn stack_push(cpu: &mut CPU, value: u8) -> Result<(), EmulatorError> {
+    let sp_address = cpu.stack_pointer as u16 + STACK_START;
+    cpu.memory.write(sp_address, value)?;
+    cpu.stack_pointer = cpu.stack_pointer.wrapping_sub(1);
+    Ok(())
+}
+
+fn stack_pop(cpu: &mut CPU) -> Result<u8, EmulatorError> {
+    cpu.stack_pointer = cpu.stack_pointer.wrapping_add(1);
+    let sp_address = cpu.stack_pointer as u16 + STACK_START;
+    cpu.memory.read(sp_address)
+}

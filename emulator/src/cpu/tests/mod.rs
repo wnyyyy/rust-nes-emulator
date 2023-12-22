@@ -1821,6 +1821,24 @@ mod test {
     }
 
     #[test]
+    fn test_rti() {
+        let mut cpu = initialize_cpu();
+        let rti = get_opcode_by_name_and_address_mode("RTI", AddressingMode::Implied).unwrap().code;
+        cpu.stack_pointer = 0xFC;
+        cpu.status = ProcessorStatus::from_u8(0b0000_0000);
+        let return_status = ProcessorStatus::from_u8(0b1001_0011);
+        let return_status_u8 = return_status.to_u8();
+        let return_address = 0x1ABC;
+        cpu.memory.write(0x01FD, return_status_u8).unwrap();
+        cpu.memory.write(0x01FE, return_address as u8).unwrap();
+        cpu.memory.write(0x01FF, (return_address >> 8) as u8).unwrap();
+        cpu.load_and_run(vec![rti, 0, 0]).unwrap();
+        let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
+        assert_eq!(cpu.status, return_status);
+        assert_eq!(cpu.program_counter, return_address + brk_bytes);
+    }
+
+    #[test]
     fn test_brk_flag() {
         let mut cpu = initialize_cpu();
         let code = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().code;

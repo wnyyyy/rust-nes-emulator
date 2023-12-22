@@ -271,6 +271,10 @@ impl CPU {
                 "RTS" => {
                     instructions::rts(self)?;
                 }
+                "RTI" => {
+                    instructions::rti(self)?;
+                    increase_pc = false;
+                }
                 "BRK" => {
                     instructions::brk(self);
                     self.program_counter += opcode.bytes as u16;
