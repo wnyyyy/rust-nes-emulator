@@ -340,32 +340,24 @@ pub fn txs(cpu: &mut CPU) {
 }
 
 pub fn pha(cpu: &mut CPU) -> Result<(), EmulatorError> {
-    let sp_address = cpu.stack_pointer as u16 + STACK_START;
-    cpu.memory.write(sp_address, cpu.register_a)?;
-    cpu.stack_pointer = cpu.stack_pointer.wrapping_sub(1);
+    stack_push(cpu, cpu.register_a)?;
     Ok(())
 }
 
 pub fn php(cpu: &mut CPU) -> Result<(), EmulatorError> {
-    let sp_address = cpu.stack_pointer as u16 + STACK_START;
-    cpu.memory.write(sp_address, cpu.status.to_u8())?;
-    cpu.stack_pointer = cpu.stack_pointer.wrapping_sub(1);
+    stack_push(cpu, cpu.status.to_u8())?;
     Ok(())
 }
 
 pub fn pla(cpu: &mut CPU) -> Result<(), EmulatorError> {
-    cpu.stack_pointer = cpu.stack_pointer.wrapping_add(1);
-    let sp_address = cpu.stack_pointer as u16 + STACK_START;
-    cpu.register_a = cpu.memory.read(sp_address)?;
+    cpu.register_a = stack_pop(cpu)?;
     cpu.status.zero = cpu.register_a == 0;
     cpu.status.negative = is_negative(cpu.register_a);
     Ok(())
 }
 
 pub fn plp(cpu: &mut CPU) -> Result<(), EmulatorError> {
-    cpu.stack_pointer = cpu.stack_pointer.wrapping_add(1);
-    let sp_address = cpu.stack_pointer as u16 + STACK_START;
-    let status_bits = cpu.memory.read(sp_address)?;
+    let status_bits = stack_pop(cpu)?;
     cpu.status = ProcessorStatus::from_u8(status_bits);
     Ok(())
 }
@@ -395,22 +387,16 @@ pub fn jsr(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     let return_address_low = (return_address & 0x00FF) as u8;
     let return_address_high = ((return_address & 0xFF00) >> 8) as u8;
 
-    let sp_address = cpu.stack_pointer as u16 + STACK_START;
-    cpu.memory.write(sp_address, return_address_high)?;
-    cpu.stack_pointer = cpu.stack_pointer.wrapping_sub(1);
-    cpu.memory.write(cpu.stack_pointer as u16 + STACK_START, return_address_low)?;
-    cpu.stack_pointer = cpu.stack_pointer.wrapping_sub(1);
+    stack_push(cpu, return_address_high)?;
+    stack_push(cpu, return_address_low)?;
 
     cpu.program_counter = address;
     Ok(())
 }
 
 pub fn rts(cpu: &mut CPU) -> Result<(), EmulatorError> {
-    cpu.stack_pointer = cpu.stack_pointer.wrapping_add(1);
-    let sp_address = cpu.stack_pointer as u16 + STACK_START;
-    let return_address_low = cpu.memory.read(sp_address)?;
-    cpu.stack_pointer = cpu.stack_pointer.wrapping_add(1);
-    let return_address_high = cpu.memory.read(cpu.stack_pointer as u16 + STACK_START)?;
+    let return_address_low = stack_pop(cpu)?;
+    let return_address_high = stack_pop(cpu)?;
     cpu.program_counter = u16::from_le_bytes([return_address_low, return_address_high]);
     Ok(())
 }
