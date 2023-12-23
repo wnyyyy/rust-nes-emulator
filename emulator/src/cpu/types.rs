@@ -69,6 +69,5 @@ pub enum AddressingMode {
     Indirect,
     IndexedIndirect,
     IndirectIndexed,
-    Accumulator,
-    None,
+    Accumulator
 }

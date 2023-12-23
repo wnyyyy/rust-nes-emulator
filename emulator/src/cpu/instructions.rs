@@ -1,4 +1,4 @@
-use crate::common::constants::STACK_START;
+use crate::common::constants::{IRQ_VECTOR, STACK_START};
 use crate::common::errors::EmulatorError;
 use crate::common::util::{is_negative, overflows_negative, overflows_positive};
 use crate::cpu::CPU;
@@ -414,7 +414,7 @@ pub fn brk(cpu: &mut CPU) -> Result<(), EmulatorError> {
     stack_push(cpu, cpu.program_counter as u8)?;
     let status = cpu.status.to_u8() | 0b0001_0000;
     stack_push(cpu, status)?;
-    cpu.program_counter = cpu.memory.read_little_endian(0xFFFE)?;
+    cpu.program_counter = cpu.memory.read_little_endian(IRQ_VECTOR)?;
     Ok(())
 }
 

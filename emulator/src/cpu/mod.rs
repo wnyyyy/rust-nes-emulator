@@ -17,7 +17,7 @@ pub struct CPU {
     register_x: u8,
     register_y: u8,
     status: ProcessorStatus,
-    memory: CpuMemoryMap,
+    pub memory: CpuMemoryMap,
 }
 
 impl CPU {
@@ -35,12 +35,31 @@ impl CPU {
     }
 
     pub fn load_and_run(&mut self, program: Vec<u8>) -> Result<(), EmulatorError> {
-        self.memory.write_program(program);
-        self.run()
+        self.load(program)?;
+        self.run(|_| Ok(()))
     }
 
-    pub fn run(&mut self) -> Result<(), EmulatorError>{
+    pub fn load(&mut self, program: Vec<u8>) -> Result<(), EmulatorError> {
+        self.memory.write_program(program);
+        self.memory.write_little_endian(0xFFFC, 0x0600)?;
+        Ok(())
+    }
+
+    pub fn reset(&mut self) {
+        self.program_counter = self.memory.read_little_endian(0xFFFC).unwrap();
+        self.stack_pointer = STACK_POINTER_INIT;
+        self.register_a = 0;
+        self.register_x = 0;
+        self.register_y = 0;
+        self.status = ProcessorStatus::new();
+    }
+
+    pub fn run<F>(&mut self, mut callback: F) -> Result<(), EmulatorError>
+    where
+        F: FnMut(&mut CPU) -> Result<(), EmulatorError> {
         loop {
+            callback(self)?;
+
             let opcode_u8 = self.memory.read(self.program_counter)?;
             let opcode = get_opcode(opcode_u8).ok_or(EmulatorError::InvalidOpcode(opcode_u8))?;
             let mut increase_pc = true;

@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod test {
-    use crate::common::constants::RAM_SIZE;
+    use crate::common::constants::{IRQ_VECTOR, RAM_SIZE};
     use crate::cpu::opcode::get_opcode_by_name_and_address_mode;
     use super::super::*;
 
@@ -1847,8 +1847,8 @@ mod test {
         cpu.status = ProcessorStatus::from_u8(0b1000_0001);
         let initial_pc = cpu.program_counter;
         let initial_status = cpu.status.to_u8();
-        cpu.memory.write(0xFFFE, 0xBC).unwrap();
-        cpu.memory.write(0xFFFF, 0x1A).unwrap();
+        cpu.memory.write(IRQ_VECTOR, 0xBC).unwrap();
+        cpu.memory.write(IRQ_VECTOR+1, 0x1A).unwrap();
         let code = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().code;
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
         let stored_status = cpu.memory.read(0x0103).unwrap();

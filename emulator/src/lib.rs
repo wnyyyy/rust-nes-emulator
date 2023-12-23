@@ -1,3 +1,4 @@
-pub mod cpu;
-pub mod memory;
-pub mod common;
+pub(crate) mod cpu;
+pub(crate) mod memory;
+pub(crate) mod common;
+pub mod vm;
