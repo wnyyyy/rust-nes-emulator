@@ -1,4 +1,4 @@
-use crate::common::constants::{IRQ_VECTOR, STACK_START};
+use crate::common::constants::{DEBUG, IRQ_VECTOR, STACK_START};
 use crate::common::errors::EmulatorError;
 use crate::common::util::{is_negative, overflows_negative, overflows_positive};
 use crate::cpu::CPU;
@@ -170,6 +170,10 @@ pub fn cpx(cpu: &mut CPU, param: u8) {
     cpu.status.zero = result == 0;
     cpu.status.negative = is_negative(result);
     cpu.status.carry = cpu.register_x >= param;
+    if DEBUG {
+        print!("\n  Comparing X: {:02X} to {:02X} | zero: {}, negative: {}, carry: {}",
+               cpu.register_x, param, cpu.status.zero, cpu.status.negative, cpu.status.carry);
+    }
 }
 
 pub fn cpy(cpu: &mut CPU, param: u8) {
@@ -278,9 +282,13 @@ pub fn bcs(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
 }
 
 pub fn beq(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    if DEBUG {
+        print!("\n  Zero: {}", cpu.status.zero);
+    }
     if cpu.status.zero {
-        let offset = cpu.memory.read(address)?;
+        let offset = address;
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
+        print!("\n  Offset: {:02X} | New PC: {:04X}", offset, cpu.program_counter);
     }
     Ok(())
 }
@@ -388,6 +396,11 @@ pub fn jsr(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     stack_push(cpu, return_address_high)?;
     stack_push(cpu, return_address_low)?;
 
+    if DEBUG {
+        print!("\n  Jumped to address: {:04X}", address);
+        print!("\n  Stored address: {:02X}{:02X}", return_address_high, return_address_low);
+    }
+
     cpu.program_counter = address;
     Ok(())
 }
@@ -395,6 +408,9 @@ pub fn jsr(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
 pub fn rts(cpu: &mut CPU) -> Result<(), EmulatorError> {
     let return_address_low = stack_pop(cpu)?;
     let return_address_high = stack_pop(cpu)?;
+    if DEBUG {
+        print!("\n  Returned to address: {:02X}{:02X}", return_address_high, return_address_low);
+    }
     cpu.program_counter = u16::from_le_bytes([return_address_low, return_address_high]);
     Ok(())
 }
@@ -403,6 +419,9 @@ pub fn rti(cpu: &mut CPU) -> Result<(), EmulatorError> {
     let status_bits = stack_pop(cpu)?;
     let return_address_low = stack_pop(cpu)?;
     let return_address_high = stack_pop(cpu)?;
+    if DEBUG {
+        print!("\n  Returned to address: {:02X}{:02X}", return_address_high, return_address_low);
+    }
     cpu.program_counter = u16::from_le_bytes([return_address_low, return_address_high]);
     cpu.status = ProcessorStatus::from_u8(status_bits);
     cpu.status.break_command = false;
@@ -422,11 +441,18 @@ fn stack_push(cpu: &mut CPU, value: u8) -> Result<(), EmulatorError> {
     let sp_address = cpu.stack_pointer as u16 + STACK_START;
     cpu.memory.write(sp_address, value)?;
     cpu.stack_pointer = cpu.stack_pointer.wrapping_sub(1);
+    if DEBUG {
+        print!("\n  Pushed {:02X} to stack at {:#04X}", value, sp_address);
+    }
     Ok(())
 }
 
 fn stack_pop(cpu: &mut CPU) -> Result<u8, EmulatorError> {
     cpu.stack_pointer = cpu.stack_pointer.wrapping_add(1);
     let sp_address = cpu.stack_pointer as u16 + STACK_START;
-    cpu.memory.read(sp_address)
+    let value = cpu.memory.read(sp_address)?;
+    if DEBUG {
+        print!("\n  Popped {:02X} from stack at {:#04X}", value, sp_address);
+    }
+    Ok(value)
 }
