@@ -6,7 +6,7 @@ mod test {
 
     fn initialize_cpu() -> CPU {
         let mut cpu = CPU::new();
-        cpu.debug = true;
+        cpu.tests = true;
         cpu.program_counter = 0x8000;
         cpu
     }
@@ -1841,7 +1841,7 @@ mod test {
     #[test]
     fn test_brk() {
         let mut cpu = initialize_cpu();
-        cpu.debug = false;
+        cpu.tests = false;
         cpu.program_counter += 0x0200;
         cpu.stack_pointer = 0x05;
         cpu.status = ProcessorStatus::from_u8(0b1000_0001);
