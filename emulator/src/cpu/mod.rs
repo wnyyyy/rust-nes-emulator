@@ -1,4 +1,4 @@
-use crate::common::constants::STACK_POINTER_INIT;
+use crate::common::constants::{DEBUG, STACK_POINTER_INIT};
 use crate::common::errors::EmulatorError;
 use crate::cpu::opcode::{get_opcode};
 use crate::cpu::types::{AddressingMode, ProcessorStatus};
@@ -10,7 +10,7 @@ mod tests;
 pub mod opcode;
 
 pub struct CPU {
-    debug: bool,
+    tests: bool,
     program_counter: u16,
     stack_pointer: u8,
     register_a: u8,
@@ -23,7 +23,7 @@ pub struct CPU {
 impl CPU {
     pub fn new() -> CPU {
         CPU {
-            debug: false,
+            tests: false,
             program_counter: 0,
             stack_pointer: STACK_POINTER_INIT,
             register_a: 0,
@@ -63,6 +63,17 @@ impl CPU {
             let opcode_u8 = self.memory.read(self.program_counter)?;
             let opcode = get_opcode(opcode_u8).ok_or(EmulatorError::InvalidOpcode(opcode_u8))?;
             let mut increase_pc = true;
+            if DEBUG {
+                print!("\nExec: {:?} at PC: {:#04X}", opcode.name, self.program_counter);
+                if opcode.bytes == 2 {
+                    let byte = self.memory.read(self.program_counter + 1)?;
+                    print!(" | param: {:#04X}", byte);
+                }
+                if opcode.bytes == 3 {
+                    let byte = self.memory.read_little_endian(self.program_counter + 1)?;
+                    print!(" | param: {:#06X}", byte);
+                }
+            }
 
             match opcode.name {
                 // Load and Store
@@ -293,7 +304,7 @@ impl CPU {
                     instructions::rts(self)?;
                 }
                 "BRK" => {
-                    if !self.debug {
+                    if !self.tests {
                         instructions::brk(self)?;
                     }
                     else {
