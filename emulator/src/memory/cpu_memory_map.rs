@@ -66,7 +66,7 @@ impl CpuMemoryMap {
     }
 
     pub fn write_program(&mut self, program: Vec<u8>) {
-        let offset = 0x8000;
+        let offset = 0x0600;
         for (i, byte) in program.iter().enumerate() {
             self.write((i + offset) as u16, *byte).unwrap();
         }
