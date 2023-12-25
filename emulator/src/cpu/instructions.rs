@@ -269,56 +269,56 @@ pub fn jmp(cpu: &mut CPU, address: u16) {
     }
 }
 
-pub fn bcc(cpu: &mut CPU, offset: u8) -> Result<(), EmulatorError> {
+pub fn bcc(cpu: &mut CPU, offset: i8) -> Result<(), EmulatorError> {
     if !cpu.status.carry {
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
     }
     Ok(())
 }
 
-pub fn bcs(cpu: &mut CPU, offset: u8) -> Result<(), EmulatorError> {
+pub fn bcs(cpu: &mut CPU, offset: i8) -> Result<(), EmulatorError> {
     if cpu.status.carry {
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
     }
     Ok(())
 }
 
-pub fn beq(cpu: &mut CPU, offset: u8) -> Result<(), EmulatorError> {
+pub fn beq(cpu: &mut CPU, offset: i8) -> Result<(), EmulatorError> {
     if cpu.status.zero {
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
     }
     Ok(())
 }
 
-pub fn bmi(cpu: &mut CPU, offset: u8) -> Result<(), EmulatorError> {
+pub fn bmi(cpu: &mut CPU, offset: i8) -> Result<(), EmulatorError> {
     if cpu.status.negative {
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
     }
     Ok(())
 }
 
-pub fn bne(cpu: &mut CPU, offset: u8) -> Result<(), EmulatorError> {
+pub fn bne(cpu: &mut CPU, offset: i8) -> Result<(), EmulatorError> {
     if !cpu.status.zero {
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
     }
     Ok(())
 }
 
-pub fn bpl(cpu: &mut CPU, offset: u8) -> Result<(), EmulatorError> {
+pub fn bpl(cpu: &mut CPU, offset: i8) -> Result<(), EmulatorError> {
     if !cpu.status.negative {
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
     }
     Ok(())
 }
 
-pub fn bvc(cpu: &mut CPU, offset: u8) -> Result<(), EmulatorError> {
+pub fn bvc(cpu: &mut CPU, offset: i8) -> Result<(), EmulatorError> {
     if !cpu.status.overflow {
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
     }
     Ok(())
 }
 
-pub fn bvs(cpu: &mut CPU, offset: u8) -> Result<(), EmulatorError> {
+pub fn bvs(cpu: &mut CPU, offset: i8) -> Result<(), EmulatorError> {
     if cpu.status.overflow {
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
     }
