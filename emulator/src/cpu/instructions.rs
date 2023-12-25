@@ -2,6 +2,7 @@ use crate::common::constants::{DEBUG, get_alias, IRQ_VECTOR, STACK_START};
 use crate::common::errors::EmulatorError;
 use crate::common::util::{is_negative, overflows_negative, overflows_positive};
 use crate::cpu::CPU;
+use crate::memory::memory::Memory;
 use crate::cpu::types::ProcessorStatus;
 
 pub fn lda(cpu: &mut CPU, param: u8) {
@@ -26,15 +27,15 @@ pub fn ldy(cpu: &mut CPU, param: u8) {
 }
 
 pub fn sta(cpu: &mut CPU, param: u16) {
-    cpu.memory.write(param, cpu.register_a).unwrap();
+    cpu.write(param, cpu.register_a).unwrap();
 }
 
 pub fn stx(cpu: &mut CPU, param: u16) {
-    cpu.memory.write(param, cpu.register_x).unwrap();
+    cpu.write(param, cpu.register_x).unwrap();
 }
 
 pub fn sty(cpu: &mut CPU, param: u16) {
-    cpu.memory.write(param, cpu.register_y).unwrap();
+    cpu.write(param, cpu.register_y).unwrap();
 }
 
 pub fn adc(cpu: &mut CPU, param: u8) {
@@ -62,9 +63,9 @@ pub fn sbc(cpu: &mut CPU, param: u8) {
 }
 
 pub fn inc(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError>{
-    let value = cpu.memory.read(address)?;
+    let value = cpu.read(address)?;
     let result = value.wrapping_add(1);
-    cpu.memory.write(address, result).unwrap();
+    cpu.write(address, result).unwrap();
 
     cpu.status.zero = result == 0;
     cpu.status.negative = is_negative(result);
@@ -86,9 +87,9 @@ pub fn iny(cpu: &mut CPU) {
 }
 
 pub fn dec(cpu: &mut CPU, param: u16) -> Result<(), EmulatorError>{
-    let value = cpu.memory.read(param)?;
+    let value = cpu.read(param)?;
     let result = value.wrapping_sub(1);
-    cpu.memory.write(param, result).unwrap();
+    cpu.write(param, result).unwrap();
 
     cpu.status.zero = result == 0;
     cpu.status.negative = is_negative(result);
@@ -197,10 +198,10 @@ pub fn asl_accumulator(cpu: &mut CPU) {
 }
 
 pub fn asl(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError>{
-    let value = cpu.memory.read(address)?;
+    let value = cpu.read(address)?;
     cpu.status.carry = value & 0b1000_0000 != 0;
     let result = value.wrapping_shl(1);
-    cpu.memory.write(address, result)?;
+    cpu.write(address, result)?;
     cpu.status.zero = result == 0;
     cpu.status.negative = is_negative(result);
     Ok(())
@@ -214,10 +215,10 @@ pub fn lsr_accumulator(cpu: &mut CPU) {
 }
 
 pub fn lsr(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError>{
-    let value = cpu.memory.read(address)?;
+    let value = cpu.read(address)?;
     cpu.status.carry = value & 0b0000_0001 != 0;
     let result = value.wrapping_shr(1);
-    cpu.memory.write(address, result)?;
+    cpu.write(address, result)?;
     cpu.status.zero = result == 0;
     cpu.status.negative = false;
     Ok(())
@@ -232,11 +233,11 @@ pub fn rol_accumulator(cpu: &mut CPU) {
 }
 
 pub fn rol(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError>{
-    let value = cpu.memory.read(address)?;
+    let value = cpu.read(address)?;
     let carry = if cpu.status.carry { 1 } else { 0 };
     cpu.status.carry = value & 0b1000_0000 != 0;
     let result = value.wrapping_shl(1) | carry;
-    cpu.memory.write(address, result)?;
+    cpu.write(address, result)?;
     cpu.status.zero = result == 0;
     cpu.status.negative = is_negative(result);
     Ok(())
@@ -251,11 +252,11 @@ pub fn ror_accumulator(cpu: &mut CPU) {
 }
 
 pub fn ror(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError>{
-    let value = cpu.memory.read(address)?;
+    let value = cpu.read(address)?;
     let carry = if cpu.status.carry { 0b1000_0000 } else { 0 };
     cpu.status.carry = value & 0b0000_0001 != 0;
     let result = value.wrapping_shr(1) | carry;
-    cpu.memory.write(address, result)?;
+    cpu.write(address, result)?;
     cpu.status.zero = result == 0;
     cpu.status.negative = is_negative(result);
     Ok(())
@@ -426,13 +427,13 @@ pub fn brk(cpu: &mut CPU) -> Result<(), EmulatorError> {
     stack_push(cpu, cpu.program_counter as u8)?;
     let status = cpu.status.to_u8() | 0b0001_0000;
     stack_push(cpu, status)?;
-    cpu.program_counter = cpu.memory.read_little_endian(IRQ_VECTOR)?;
+    cpu.program_counter = cpu.read_u16(IRQ_VECTOR)?;
     Ok(())
 }
 
 fn stack_push(cpu: &mut CPU, value: u8) -> Result<(), EmulatorError> {
     let sp_address = cpu.stack_pointer as u16 + STACK_START;
-    cpu.memory.write(sp_address, value)?;
+    cpu.write(sp_address, value)?;
     cpu.stack_pointer = cpu.stack_pointer.wrapping_sub(1);
     if DEBUG {
         print!("\n  Pushed {:02X} to stack at {:#04X}", value, sp_address);
@@ -443,7 +444,7 @@ fn stack_push(cpu: &mut CPU, value: u8) -> Result<(), EmulatorError> {
 fn stack_pop(cpu: &mut CPU) -> Result<u8, EmulatorError> {
     cpu.stack_pointer = cpu.stack_pointer.wrapping_add(1);
     let sp_address = cpu.stack_pointer as u16 + STACK_START;
-    let value = cpu.memory.read(sp_address)?;
+    let value = cpu.read(sp_address)?;
     if DEBUG {
         print!("\n  Popped {:02X} from stack at {:#04X}", value, sp_address);
     }

@@ -109,7 +109,7 @@ mod test {
         cpu.register_a = test_value;
         let code = get_opcode_by_name_and_address_mode("STA", AddressingMode::ZeroPage).unwrap().code;
         cpu.load_and_run(vec![code, test_addr, 0]).unwrap();
-        let stored = cpu.memory.read(test_addr as u16).unwrap();
+        let stored = cpu.read(test_addr as u16).unwrap();
         assert_eq!(stored, test_value);
     }
 
@@ -121,7 +121,7 @@ mod test {
         cpu.register_x = test_value;
         let code = get_opcode_by_name_and_address_mode("STX", AddressingMode::ZeroPage).unwrap().code;
         cpu.load_and_run(vec![code, test_addr, 0]).unwrap();
-        let stored = cpu.memory.read(test_addr as u16).unwrap();
+        let stored = cpu.read(test_addr as u16).unwrap();
         assert_eq!(stored, test_value);
     }
 
@@ -133,7 +133,7 @@ mod test {
         cpu.register_y = test_value;
         let code = get_opcode_by_name_and_address_mode("STY", AddressingMode::ZeroPage).unwrap().code;
         cpu.load_and_run(vec![code, test_addr, 0]).unwrap();
-        let stored = cpu.memory.read(test_addr as u16).unwrap();
+        let stored = cpu.read(test_addr as u16).unwrap();
         assert_eq!(stored, test_value);
     }
 
@@ -381,9 +381,9 @@ mod test {
         let address = 0x10;
         let value = 0x05;
         let code = get_opcode_by_name_and_address_mode("INC", AddressingMode::ZeroPage).unwrap().code;
-        cpu.memory.write(address, value as u8).unwrap();
+        cpu.write(address, value as u8).unwrap();
         cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
-        let stored = cpu.memory.read(address).unwrap();
+        let stored = cpu.read(address).unwrap();
         assert_eq!(stored, 0x06);
         assert!(!cpu.status.zero);
         assert!(!cpu.status.negative);
@@ -395,9 +395,9 @@ mod test {
         let code = get_opcode_by_name_and_address_mode("INC", AddressingMode::ZeroPage).unwrap().code;
         let address = 0x10;
         let value = 0x7F;
-        cpu.memory.write(address, value as u8).unwrap();
+        cpu.write(address, value as u8).unwrap();
         cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
-        let stored = cpu.memory.read(address).unwrap();
+        let stored = cpu.read(address).unwrap();
         assert_eq!(stored, 0x80);
         assert!(!cpu.status.zero);
         assert!(cpu.status.negative);
@@ -409,9 +409,9 @@ mod test {
         let code = get_opcode_by_name_and_address_mode("INC", AddressingMode::ZeroPage).unwrap().code;
         let address = 0x10;
         let value = 0xFF;
-        cpu.memory.write(address, value as u8).unwrap();
+        cpu.write(address, value as u8).unwrap();
         cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
-        let stored = cpu.memory.read(address).unwrap();
+        let stored = cpu.read(address).unwrap();
         assert_eq!(stored, 0x00);
         assert!(cpu.status.zero);
         assert!(!cpu.status.negative);
@@ -489,9 +489,9 @@ mod test {
         let address = 0x10;
         let value = 0x07;
         let code = get_opcode_by_name_and_address_mode("DEC", AddressingMode::ZeroPage).unwrap().code;
-        cpu.memory.write(address, value as u8).unwrap();
+        cpu.write(address, value as u8).unwrap();
         cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
-        let stored = cpu.memory.read(address).unwrap();
+        let stored = cpu.read(address).unwrap();
         assert_eq!(stored, 0x06);
         assert!(!cpu.status.zero);
         assert!(!cpu.status.negative);
@@ -503,9 +503,9 @@ mod test {
         let code = get_opcode_by_name_and_address_mode("DEC", AddressingMode::ZeroPage).unwrap().code;
         let address = 0x10;
         let value = 0x00;
-        cpu.memory.write(address, value as u8).unwrap();
+        cpu.write(address, value as u8).unwrap();
         cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
-        let stored = cpu.memory.read(address).unwrap();
+        let stored = cpu.read(address).unwrap();
         assert_eq!(stored, 0xFF);
         assert!(!cpu.status.zero);
         assert!(cpu.status.negative);
@@ -517,9 +517,9 @@ mod test {
         let code = get_opcode_by_name_and_address_mode("DEC", AddressingMode::ZeroPage).unwrap().code;
         let address = 0x10;
         let value = 0x01;
-        cpu.memory.write(address, value as u8).unwrap();
+        cpu.write(address, value as u8).unwrap();
         cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
-        let stored = cpu.memory.read(address).unwrap();
+        let stored = cpu.read(address).unwrap();
         assert_eq!(stored, 0x00);
         assert!(cpu.status.zero);
         assert!(!cpu.status.negative);
@@ -730,7 +730,7 @@ mod test {
         let address= 0x10;
         let memory_value = 0b1010_1010;
         let expected = 0b0010_1000;
-        cpu.memory.write(address, memory_value).unwrap();
+        cpu.write(address, memory_value).unwrap();
         cpu.register_a = 0b0010_1100;
         cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
         assert_eq!(cpu.register_a, expected);
@@ -745,7 +745,7 @@ mod test {
         let address= 0x10;
         let memory_value = 0b1010_1010;
         let expected = 0b1010_1000;
-        cpu.memory.write(address, memory_value).unwrap();
+        cpu.write(address, memory_value).unwrap();
         cpu.register_a = 0b1110_1100;
         cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
         assert_eq!(cpu.register_a, expected);
@@ -760,7 +760,7 @@ mod test {
         let address= 0x10;
         let memory_value = 0b0000_0011;
         let expected = 0b0000_0000;
-        cpu.memory.write(address, memory_value).unwrap();
+        cpu.write(address, memory_value).unwrap();
         cpu.register_a = 0b1110_1100;
         cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
         assert_eq!(cpu.register_a, expected);
@@ -960,7 +960,7 @@ mod test {
         let code = get_opcode_by_name_and_address_mode("BIT", AddressingMode::ZeroPage).unwrap().code;
         let address = 0x10;
         let value = 0b0011_1111;
-        cpu.memory.write(address, value).unwrap();
+        cpu.write(address, value).unwrap();
         cpu.register_a = 0b1111_1111;
         cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
         assert!(!cpu.status.zero);
@@ -974,7 +974,7 @@ mod test {
         let code = get_opcode_by_name_and_address_mode("BIT", AddressingMode::ZeroPage).unwrap().code;
         let address = 0x10;
         let value = 0b1000_0000;
-        cpu.memory.write(address, value).unwrap();
+        cpu.write(address, value).unwrap();
         cpu.register_a = 0b1111_1111;
         cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
         assert!(!cpu.status.zero);
@@ -988,7 +988,7 @@ mod test {
         let code = get_opcode_by_name_and_address_mode("BIT", AddressingMode::ZeroPage).unwrap().code;
         let address = 0x10;
         let value = 0b0011_1100;
-        cpu.memory.write(address, value).unwrap();
+        cpu.write(address, value).unwrap();
         cpu.register_a = 0b0000_0011;
         cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
         assert!(cpu.status.zero);
@@ -1002,7 +1002,7 @@ mod test {
         let code = get_opcode_by_name_and_address_mode("BIT", AddressingMode::ZeroPage).unwrap().code;
         let address = 0x10;
         let value = 0b0100_0000;
-        cpu.memory.write(address, value).unwrap();
+        cpu.write(address, value).unwrap();
         cpu.register_a = 0;
         cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
         assert!(cpu.status.zero);
@@ -1064,9 +1064,9 @@ mod test {
         let code = get_opcode_by_name_and_address_mode("ASL", AddressingMode::ZeroPage).unwrap().code;
         let address = 0x10;
         let value = 0b0100_0001;
-        cpu.memory.write(address, value).unwrap();
+        cpu.write(address, value).unwrap();
         cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
-        let store = cpu.memory.read(address).unwrap();
+        let store = cpu.read(address).unwrap();
         assert_eq!(store, 0b1000_0010);
         assert!(!cpu.status.zero);
         assert!(cpu.status.negative);
@@ -1115,9 +1115,9 @@ mod test {
         let code = get_opcode_by_name_and_address_mode("LSR", AddressingMode::ZeroPage).unwrap().code;
         let address = 0x10;
         let value = 0b1000_0010;
-        cpu.memory.write(address, value).unwrap();
+        cpu.write(address, value).unwrap();
         cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
-        let store = cpu.memory.read(address).unwrap();
+        let store = cpu.read(address).unwrap();
         assert_eq!(store, 0b0100_0001);
         assert!(!cpu.status.zero);
         assert!(!cpu.status.negative);
@@ -1180,9 +1180,9 @@ mod test {
         let address = 0x10;
         let value = 0b0100_0001;
         cpu.status.carry = true;
-        cpu.memory.write(address, value).unwrap();
+        cpu.write(address, value).unwrap();
         cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
-        let store = cpu.memory.read(address).unwrap();
+        let store = cpu.read(address).unwrap();
         assert_eq!(store, 0b1000_0011);
         assert!(!cpu.status.zero);
         assert!(cpu.status.negative);
@@ -1245,9 +1245,9 @@ mod test {
         let code = get_opcode_by_name_and_address_mode("ROR", AddressingMode::ZeroPage).unwrap().code;
         let address = 0x10;
         let value = 0b1000_0011;
-        cpu.memory.write(address, value).unwrap();
+        cpu.write(address, value).unwrap();
         cpu.load_and_run(vec![code, address as u8, 0]).unwrap();
-        let store = cpu.memory.read(address).unwrap();
+        let store = cpu.read(address).unwrap();
         assert_eq!(store, 0b0100_0001);
         assert!(!cpu.status.zero);
         assert!(!cpu.status.negative);
@@ -1270,8 +1270,8 @@ mod test {
         let code = get_opcode_by_name_and_address_mode("JMP", AddressingMode::Indirect).unwrap().code;
         let jump_address = 0x4EFF;
         let address = 0x1ABC;
-        cpu.memory.write(address + 1, (jump_address >> 8) as u8).unwrap();
-        cpu.memory.write(address, jump_address as u8).unwrap();
+        cpu.write(address + 1, (jump_address >> 8) as u8).unwrap();
+        cpu.write(address, jump_address as u8).unwrap();
         cpu.load_and_run(vec![code, address as u8, (address >> 8) as u8, 0]).unwrap();
         let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
         assert_eq!(cpu.program_counter, jump_address + brk_bytes);
@@ -1286,7 +1286,7 @@ mod test {
         let old_pc = cpu.program_counter;
         let branch = 0x05;
         let branch_address = 0x10;
-        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.write(branch_address, branch).unwrap();
         cpu.status.carry = false;
         let mut program = vec![0; 0x0F];
         program.extend_from_slice(&[code, branch_address as u8, 0]);
@@ -1305,7 +1305,7 @@ mod test {
         let old_pc = cpu.program_counter;
         let branch = 0x05;
         let branch_address = 0x10;
-        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.write(branch_address, branch).unwrap();
         cpu.status.carry = true;
         let mut program = vec![0; 0x0F];
         program.extend_from_slice(&[code, branch_address as u8, 0]);
@@ -1324,7 +1324,7 @@ mod test {
         let old_pc = cpu.program_counter;
         let branch = 0xFB;
         let branch_address = 0x10;
-        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.write(branch_address, branch).unwrap();
         cpu.status.carry = true;
         let mut program = vec![0; 0x0F];
         program.extend_from_slice(&[code, branch_address as u8, 0]);
@@ -1343,7 +1343,7 @@ mod test {
         let old_pc = cpu.program_counter;
         let branch = 0xFB;
         let branch_address = 0x10;
-        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.write(branch_address, branch).unwrap();
         cpu.status.carry = false;
         let mut program = vec![0; 0x0F];
         program.extend_from_slice(&[code, branch_address as u8, 0]);
@@ -1362,7 +1362,7 @@ mod test {
         let old_pc = cpu.program_counter;
         let branch = 0x01;
         let branch_address = 0x10;
-        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.write(branch_address, branch).unwrap();
         cpu.status.zero = true;
         let mut program = vec![0; 0x0F];
         program.extend_from_slice(&[code, branch_address as u8, 0]);
@@ -1381,7 +1381,7 @@ mod test {
         let old_pc = cpu.program_counter;
         let branch = 0x01;
         let branch_address = 0x10;
-        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.write(branch_address, branch).unwrap();
         cpu.status.zero = false;
         let mut program = vec![0; 0x0F];
         program.extend_from_slice(&[code, branch_address as u8, 0]);
@@ -1400,7 +1400,7 @@ mod test {
         let old_pc = cpu.program_counter;
         let branch = 0x81;
         let branch_address = 0x10;
-        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.write(branch_address, branch).unwrap();
         cpu.status.negative = true;
         let mut program = vec![0; 0x0F];
         program.extend_from_slice(&[code, branch_address as u8, 0]);
@@ -1419,7 +1419,7 @@ mod test {
         let old_pc = cpu.program_counter;
         let branch = 0x81;
         let branch_address = 0x10;
-        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.write(branch_address, branch).unwrap();
         cpu.status.negative = false;
         let mut program = vec![0; 0x0F];
         program.extend_from_slice(&[code, branch_address as u8, 0]);
@@ -1438,7 +1438,7 @@ mod test {
         let old_pc = cpu.program_counter;
         let branch = 0xAA;
         let branch_address = 0x10;
-        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.write(branch_address, branch).unwrap();
         cpu.status.zero = false;
         let mut program = vec![0; 0x0F];
         program.extend_from_slice(&[code, branch_address as u8, 0]);
@@ -1457,7 +1457,7 @@ mod test {
         let old_pc = cpu.program_counter;
         let branch = 0xAA;
         let branch_address = 0x10;
-        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.write(branch_address, branch).unwrap();
         cpu.status.zero = true;
         let mut program = vec![0; 0x0F];
         program.extend_from_slice(&[code, branch_address as u8, 0]);
@@ -1476,7 +1476,7 @@ mod test {
         let old_pc = cpu.program_counter;
         let branch = 0x79;
         let branch_address = 0x10;
-        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.write(branch_address, branch).unwrap();
         cpu.status.negative = false;
         let mut program = vec![0; 0x0F];
         program.extend_from_slice(&[code, branch_address as u8, 0]);
@@ -1495,7 +1495,7 @@ mod test {
         let old_pc = cpu.program_counter;
         let branch = 0x79;
         let branch_address = 0x10;
-        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.write(branch_address, branch).unwrap();
         cpu.status.negative = true;
         let mut program = vec![0; 0x0F];
         program.extend_from_slice(&[code, branch_address as u8, 0]);
@@ -1514,7 +1514,7 @@ mod test {
         let old_pc = cpu.program_counter;
         let branch = 0xDD;
         let branch_address = 0x10;
-        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.write(branch_address, branch).unwrap();
         cpu.status.overflow = false;
         let mut program = vec![0; 0x0F];
         program.extend_from_slice(&[code, branch_address as u8, 0]);
@@ -1533,7 +1533,7 @@ mod test {
         let old_pc = cpu.program_counter;
         let branch = 0xDD;
         let branch_address = 0x10;
-        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.write(branch_address, branch).unwrap();
         cpu.status.overflow = true;
         let mut program = vec![0; 0x0F];
         program.extend_from_slice(&[code, branch_address as u8, 0]);
@@ -1552,7 +1552,7 @@ mod test {
         let old_pc = cpu.program_counter;
         let branch = 0x04;
         let branch_address = 0x10;
-        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.write(branch_address, branch).unwrap();
         cpu.status.overflow = true;
         let mut program = vec![0; 0x0F];
         program.extend_from_slice(&[code, branch_address as u8, 0]);
@@ -1571,7 +1571,7 @@ mod test {
         let old_pc = cpu.program_counter;
         let branch = 0x04;
         let branch_address = 0x10;
-        cpu.memory.write(branch_address, branch).unwrap();
+        cpu.write(branch_address, branch).unwrap();
         cpu.status.overflow = false;
         let mut program = vec![0; 0x0F];
         program.extend_from_slice(&[code, branch_address as u8, 0]);
@@ -1630,7 +1630,7 @@ mod test {
         let address = STACK_POINTER_INIT as u16 + 0x0100;
         let code = get_opcode_by_name_and_address_mode("PHA", AddressingMode::Implied).unwrap().code;
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
-        assert_eq!(cpu.memory.read(address).unwrap(), 0xAA);
+        assert_eq!(cpu.read(address).unwrap(), 0xAA);
         assert_eq!(cpu.stack_pointer, STACK_POINTER_INIT - 1);
     }
 
@@ -1642,7 +1642,7 @@ mod test {
         let address = 0x0100;
         let code = get_opcode_by_name_and_address_mode("PHA", AddressingMode::Implied).unwrap().code;
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
-        assert_eq!(cpu.memory.read(address).unwrap(), 0xAA);
+        assert_eq!(cpu.read(address).unwrap(), 0xAA);
         assert_eq!(cpu.stack_pointer, STACK_POINTER_INIT);
     }
 
@@ -1654,7 +1654,7 @@ mod test {
         let address = STACK_POINTER_INIT as u16 + 0x0100;
         let code = get_opcode_by_name_and_address_mode("PHP", AddressingMode::Implied).unwrap().code;
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
-        assert_eq!(cpu.memory.read(address).unwrap(), status.to_u8() | 0b0001_0000);
+        assert_eq!(cpu.read(address).unwrap(), status.to_u8() | 0b0001_0000);
         assert_eq!(cpu.stack_pointer, STACK_POINTER_INIT - 1);
     }
 
@@ -1667,7 +1667,7 @@ mod test {
         let address = 0x0100;
         let code = get_opcode_by_name_and_address_mode("PHP", AddressingMode::Implied).unwrap().code;
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
-        assert_eq!(cpu.memory.read(address).unwrap(), status.to_u8() | 0b0001_0000);
+        assert_eq!(cpu.read(address).unwrap(), status.to_u8() | 0b0001_0000);
         assert_eq!(cpu.stack_pointer, STACK_POINTER_INIT);
     }
 
@@ -1678,7 +1678,7 @@ mod test {
         let test_offset = 0x10;
         let test_value = 0x03;
         let address = STACK_POINTER_INIT as u16 + 0x0100 - test_offset;
-        cpu.memory.write(address, test_value).unwrap();
+        cpu.write(address, test_value).unwrap();
         cpu.stack_pointer -= test_offset as u8 + 1;
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
         assert_eq!(cpu.register_a, test_value);
@@ -1693,7 +1693,7 @@ mod test {
         let test_offset = 0xFF;
         let test_value = 0xF0;
         let address = STACK_POINTER_INIT as u16 + 0x0100 - test_offset;
-        cpu.memory.write(address, test_value).unwrap();
+        cpu.write(address, test_value).unwrap();
         cpu.stack_pointer = (cpu.stack_pointer - test_offset as u8).wrapping_sub(1);
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
         assert_eq!(cpu.register_a, test_value);
@@ -1709,7 +1709,7 @@ mod test {
         let test_offset = 0x00;
         let test_value = 0;
         let address = STACK_POINTER_INIT as u16 + 0x0100 + test_offset;
-        cpu.memory.write(address, test_value).unwrap();
+        cpu.write(address, test_value).unwrap();
         cpu.stack_pointer = STACK_POINTER_INIT - 1;
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
         assert_eq!(cpu.register_a, test_value);
@@ -1730,7 +1730,7 @@ mod test {
         status.interrupt_disable = true;
         let test_value = status.to_u8();
         let address = STACK_POINTER_INIT as u16 + 0x0100 - test_offset;
-        cpu.memory.write(address, test_value).unwrap();
+        cpu.write(address, test_value).unwrap();
         cpu.stack_pointer -= test_offset as u8 + 1;
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
         let new = cpu.status.to_u8();
@@ -1795,8 +1795,8 @@ mod test {
         let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
         assert_eq!(cpu.program_counter, target_address + brk_bytes);
         assert_eq!(cpu.stack_pointer, 0xFD);
-        let high_byte = cpu.memory.read(0x01FF).unwrap();
-        let low_byte = cpu.memory.read(0x01FE).unwrap();
+        let high_byte = cpu.read(0x01FF).unwrap();
+        let low_byte = cpu.read(0x01FE).unwrap();
         let pushed_address = (high_byte as u16) << 8 | low_byte as u16;
         assert_eq!(pushed_address, return_address);
     }
@@ -1810,7 +1810,7 @@ mod test {
         let initial_pc = cpu.program_counter;
         cpu.stack_pointer = 0xFF;
         let target_address = 0x1ABC;
-        cpu.memory.write(0x1ABC, rts).unwrap();
+        cpu.write(0x1ABC, rts).unwrap();
         let mut program = vec![0; 0x0200];
         program.extend_from_slice(&[jsr.code, target_address as u8, (target_address >> 8) as u8]);
         program.extend_from_slice(&[0; RAM_SIZE as usize]);
@@ -1829,9 +1829,9 @@ mod test {
         let return_status = ProcessorStatus::from_u8(0b1000_0011);
         let return_status_u8 = return_status.to_u8();
         let return_address = 0x1ABC;
-        cpu.memory.write(0x01FD, return_status_u8 | 0b0001_0000).unwrap();
-        cpu.memory.write(0x01FE, return_address as u8).unwrap();
-        cpu.memory.write(0x01FF, (return_address >> 8) as u8).unwrap();
+        cpu.write(0x01FD, return_status_u8 | 0b0001_0000).unwrap();
+        cpu.write(0x01FE, return_address as u8).unwrap();
+        cpu.write(0x01FF, (return_address >> 8) as u8).unwrap();
         cpu.load_and_run(vec![rti, 0, 0]).unwrap();
         let brk_bytes = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().bytes as u16;
         assert_eq!(cpu.status, return_status);
@@ -1847,13 +1847,13 @@ mod test {
         cpu.status = ProcessorStatus::from_u8(0b1000_0001);
         let initial_pc = cpu.program_counter;
         let initial_status = cpu.status.to_u8();
-        cpu.memory.write(IRQ_VECTOR, 0xBC).unwrap();
-        cpu.memory.write(IRQ_VECTOR+1, 0x1A).unwrap();
+        cpu.write(IRQ_VECTOR, 0xBC).unwrap();
+        cpu.write(IRQ_VECTOR+1, 0x1A).unwrap();
         let code = get_opcode_by_name_and_address_mode("BRK", AddressingMode::Implied).unwrap().code;
         cpu.load_and_run(vec![code, 0, 0]).unwrap();
-        let stored_status = cpu.memory.read(0x0103).unwrap();
-        let stored_pc_low = cpu.memory.read(0x0104).unwrap();
-        let stored_pc_high = cpu.memory.read(0x0105).unwrap();
+        let stored_status = cpu.read(0x0103).unwrap();
+        let stored_pc_low = cpu.read(0x0104).unwrap();
+        let stored_pc_high = cpu.read(0x0105).unwrap();
         let stored_pc = (stored_pc_high as u16) << 8 | stored_pc_low as u16;
         assert_eq!(cpu.stack_pointer, 0x02);
         assert_eq!(cpu.program_counter, 0x1ABC);

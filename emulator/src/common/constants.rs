@@ -1,8 +1,12 @@
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 
-pub const RAM_SIZE: u16 = 2048;
+pub const RAM_SIZE: usize = 2048;
 pub const MEMORY_SIZE: usize = 65536;
+pub const RAM_START: u16 = 0x0000;
+pub const RAM_END: u16 = 0x1FFF;
+pub const PPU_START: u16 = 0x2000;
+pub const PPU_END: u16 = 0x3FFF;
 
 pub const STACK_START: u16 = 0x0100;
 pub const STACK_POINTER_INIT: u8 = 0xFF;

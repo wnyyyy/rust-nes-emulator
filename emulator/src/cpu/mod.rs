@@ -2,7 +2,8 @@ use crate::common::constants::{DEBUG, STACK_POINTER_INIT};
 use crate::common::errors::EmulatorError;
 use crate::cpu::opcode::{get_opcode};
 use crate::cpu::types::{AddressingMode, ProcessorStatus};
-use crate::memory::cpu_memory_map::CpuMemoryMap;
+use crate::memory::bus::Bus;
+use crate::memory::memory::Memory;
 
 mod types;
 mod instructions;
@@ -17,7 +18,25 @@ pub struct CPU {
     register_x: u8,
     register_y: u8,
     status: ProcessorStatus,
-    pub memory: CpuMemoryMap,
+    bus: Bus,
+}
+
+impl Memory for CPU {
+    fn read(&self, address: u16) -> Result<u8, EmulatorError> {
+        self.bus.read(address)
+    }
+
+    fn write(&mut self, address: u16, value: u8) -> Result<(), EmulatorError> {
+        self.bus.write(address, value)
+    }
+
+    fn read_u16(&self, address: u16) -> Result<u16, EmulatorError> {
+        self.bus.read_u16(address)
+    }
+
+    fn write_u16(&mut self, address: u16, value: u16) -> Result<(), EmulatorError> {
+        self.bus.write_u16(address, value)
+    }
 }
 
 impl CPU {
@@ -30,7 +49,7 @@ impl CPU {
             register_x: 0,
             register_y: 0,
             status: ProcessorStatus::new(),
-            memory: CpuMemoryMap::new(),
+            bus: Bus::new(),
         }
     }
 
@@ -40,13 +59,13 @@ impl CPU {
     }
 
     pub fn load(&mut self, program: Vec<u8>) -> Result<(), EmulatorError> {
-        self.memory.write_program(program);
-        self.memory.write_little_endian(0xFFFC, 0x0600)?;
+        self.write_program(program)?;
+        self.write_u16(0xFFFC, 0x0600)?;
         Ok(())
     }
 
     pub fn reset(&mut self) {
-        self.program_counter = self.memory.read_little_endian(0xFFFC).unwrap();
+        self.program_counter = self.read_u16(0xFFFC).unwrap();
         self.stack_pointer = STACK_POINTER_INIT;
         self.register_a = 0;
         self.register_x = 0;
@@ -60,17 +79,17 @@ impl CPU {
         loop {
             callback(self)?;
 
-            let opcode_u8 = self.memory.read(self.program_counter)?;
+            let opcode_u8 = self.read(self.program_counter)?;
             let opcode = get_opcode(opcode_u8).ok_or(EmulatorError::InvalidOpcode(opcode_u8))?;
             let mut increase_pc = true;
             if DEBUG && self.program_counter < 0x72D {
                 print!("\nExec: {:?} at PC: {:#04X} | Addressing mode: {:?}", opcode.name, self.program_counter, opcode.address_mode);
                 if opcode.bytes == 2 {
-                    let byte = self.memory.read(self.program_counter + 1)?;
+                    let byte = self.read(self.program_counter + 1)?;
                     print!(" | param: {:#04X}", byte);
                 }
                 if opcode.bytes == 3 {
-                    let byte = self.memory.read_little_endian(self.program_counter + 1)?;
+                    let byte = self.read_u16(self.program_counter + 1)?;
                     print!(" | param: {:#06X}", byte);
                 }
             }
@@ -79,17 +98,17 @@ impl CPU {
                 // Load and Store
                 "LDA" => {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
-                    let param = self.memory.read(param_address)?;
+                    let param = self.read(param_address)?;
                     instructions::lda(self, param);
                 }
                 "LDX" => {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
-                    let param = self.memory.read(param_address)?;
+                    let param = self.read(param_address)?;
                     instructions::ldx(self, param);
                 }
                 "LDY" => {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
-                    let param = self.memory.read(param_address)?;
+                    let param = self.read(param_address)?;
                     instructions::ldy(self, param);
                 }
                 "STA" => {
@@ -107,12 +126,12 @@ impl CPU {
                 // Arithmetic
                 "ADC" => {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
-                    let param = self.memory.read(param_address)?;
+                    let param = self.read(param_address)?;
                     instructions::adc(self, param);
                 }
                 "SBC" => {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
-                    let param = self.memory.read(param_address)?;
+                    let param = self.read(param_address)?;
                     instructions::sbc(self, param);
                 }
                 // Increment and Decrement
@@ -152,38 +171,38 @@ impl CPU {
                 // Logical
                 "AND" => {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
-                    let param = self.memory.read(param_address)?;
+                    let param = self.read(param_address)?;
                     instructions::and(self, param);
                 }
                 "EOR" => {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
-                    let param = self.memory.read(param_address)?;
+                    let param = self.read(param_address)?;
                     instructions::eor(self, param);
                 }
                 "ORA" => {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
-                    let param = self.memory.read(param_address)?;
+                    let param = self.read(param_address)?;
                     instructions::ora(self, param);
                 }
                 // Compare and Bit Test
                 "CMP" => {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
-                    let param = self.memory.read(param_address)?;
+                    let param = self.read(param_address)?;
                     instructions::cmp(self, param);
                 }
                 "CPX" => {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
-                    let param = self.memory.read(param_address)?;
+                    let param = self.read(param_address)?;
                     instructions::cpx(self, param);
                 }
                 "CPY" => {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
-                    let param = self.memory.read(param_address)?;
+                    let param = self.read(param_address)?;
                     instructions::cpy(self, param);
                 }
                 "BIT" => {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
-                    let param = self.memory.read(param_address)?;
+                    let param = self.read(param_address)?;
                     instructions::bit(self, param);
                 }
                 // Shift and Rotate
@@ -326,48 +345,55 @@ impl CPU {
         Ok(())
     }
 
+    fn write_program(&mut self, program: Vec<u8>) -> Result<(), EmulatorError> {
+        for (i, byte) in program.iter().enumerate() {
+            self.write(0x0600 + i as u16, *byte)?;
+        }
+        Ok(())
+    }
+
     fn get_param_address(&self, mode: &AddressingMode) -> Result<u16, EmulatorError> {
         let param = self.program_counter + 1;
         match mode {
             AddressingMode::Immediate => Ok(param),
             AddressingMode::ZeroPage => {
-                let address = self.memory.read(param)?;
+                let address = self.read(param)?;
                 Ok(address as u16)
             }
             AddressingMode::ZeroPageX => {
-                let address = self.memory.read(param)?;
+                let address = self.read(param)?;
                 Ok((address.wrapping_add(self.register_x)) as u16)
             }
             AddressingMode::ZeroPageY => {
-                let address = self.memory.read(param)?;
+                let address = self.read(param)?;
                 Ok((address.wrapping_add(self.register_y)) as u16)
             }
             AddressingMode::Absolute => {
-                let address = self.memory.read_little_endian(param)?;
+                let address = self.read_u16(param)?;
                 Ok(address)
             }
             AddressingMode::AbsoluteX => {
-                let address = self.memory.read_little_endian(param)?;
+                let address = self.read_u16(param)?;
                 Ok(address.wrapping_add(self.register_x as u16))
             }
             AddressingMode::AbsoluteY => {
-                let address = self.memory.read_little_endian(param)?;
+                let address = self.read_u16(param)?;
                 Ok(address.wrapping_add(self.register_y as u16))
             }
             AddressingMode::Indirect => {
-                let address = self.memory.read_little_endian(param)?;
-                Ok(self.memory.read_little_endian(address)?)
+                let address = self.read_u16(param)?;
+                Ok(self.read_u16(address)?)
             }
             AddressingMode::IndexedIndirect => {
-                let address = self.memory.read(param)?.wrapping_add(self.register_x);
-                Ok(self.memory.read_little_endian(address as u16)?)
+                let address = self.read(param)?.wrapping_add(self.register_x);
+                Ok(self.read_u16(address as u16)?)
             }
             AddressingMode::IndirectIndexed => {
-                let address = self.memory.read(param)?;
-                Ok(self.memory.read_little_endian(address as u16)?.wrapping_add(self.register_y as u16))
+                let address = self.read(param)?;
+                Ok(self.read_u16(address as u16)?.wrapping_add(self.register_y as u16))
             }
             AddressingMode::Relative => {
-                let address = self.memory.read(param)?;
+                let address = self.read(param)?;
                 Ok(address as u16)
             }
             _ => Err(EmulatorError::UnimplementedAddressingMode(format!("{:?}", mode))),

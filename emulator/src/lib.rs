@@ -1,3 +1,3 @@
 pub mod cpu;
-pub(crate) mod memory;
+pub mod memory;
 pub(crate) mod common;

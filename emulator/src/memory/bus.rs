@@ -1,0 +1,62 @@
+use crate::memory::memory::Memory;
+use crate::common::errors::EmulatorError;
+use crate::common::constants::{PPU_END, PPU_START, RAM_END, RAM_SIZE, RAM_START};
+
+pub struct Bus {
+   cpu_ram: [u8; RAM_SIZE]
+}
+
+impl Bus {
+   pub fn new() -> Self{
+       Bus {
+           cpu_ram: [0; RAM_SIZE]
+       }
+   }
+}
+impl Memory for Bus {
+    fn read(&self, address: u16) -> Result<u8, EmulatorError> {
+        match address {
+            RAM_START ..= RAM_END => {
+                let mirror_address = (address % RAM_SIZE as u16) as usize;
+                Ok(self.cpu_ram[mirror_address])
+            }
+            PPU_START ..= PPU_END => {
+                Err(EmulatorError::AccessViolation(address))
+            }
+            _ => {
+                Err(EmulatorError::AccessViolation(address))
+            }
+        }
+    }
+
+    fn read_u16(&self, address: u16) -> Result<u16, EmulatorError> {
+        let low_byte = self.read(address)?;
+        let high_byte = self.read(address + 1)?;
+        Ok(u16::from_le_bytes([low_byte, high_byte]))
+    }
+
+    fn write(&mut self, address: u16, data: u8) -> Result<(), EmulatorError> {
+        match address {
+            RAM_START ..= RAM_END => {
+                let mirror_address = (address % RAM_SIZE as u16) as usize;
+                self.cpu_ram[mirror_address] = data;
+                Ok(())
+            }
+            PPU_START ..= PPU_END => {
+                Err(EmulatorError::AccessViolation(address))
+            }
+            _ => {
+                Err(EmulatorError::AccessViolation(address))
+            }
+        }
+    }
+
+    fn write_u16(&mut self, address: u16, value: u16) -> Result<(), EmulatorError> {
+        let low_byte = (value & 0xFF) as u8;
+        let high_byte = (value >> 8) as u8;
+
+        self.write(address, low_byte)?;
+        self.write(address + 1, high_byte)?;
+        Ok(())
+    }
+}

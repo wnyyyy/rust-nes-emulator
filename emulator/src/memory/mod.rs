@@ -1,1 +1,2 @@
-pub mod cpu_memory_map;
+pub mod bus;
+pub mod memory;
