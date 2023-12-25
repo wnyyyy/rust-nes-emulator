@@ -70,16 +70,16 @@ fn handle_user_input(cpu: &mut CPU, event_pump: &mut EventPump) {
                 std::process::exit(0)
             },
             Event::KeyDown { keycode: Some(Keycode::W), .. } => {
-                cpu.write(0xff, 0x77);
+                cpu.write(0xff, 0x77).unwrap();
             },
             Event::KeyDown { keycode: Some(Keycode::S), .. } => {
-                cpu.write(0xff, 0x73);
+                cpu.write(0xff, 0x73).unwrap();
             },
             Event::KeyDown { keycode: Some(Keycode::A), .. } => {
-                cpu.write(0xff, 0x61);
+                cpu.write(0xff, 0x61).unwrap();
             },
             Event::KeyDown { keycode: Some(Keycode::D), .. } => {
-                cpu.write(0xff, 0x64);
+                cpu.write(0xff, 0x64).unwrap();
             }
             _ => {/* do nothing */}
         }

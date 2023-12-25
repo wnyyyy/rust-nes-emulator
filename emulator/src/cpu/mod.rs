@@ -1,4 +1,4 @@
-use crate::common::constants::{DEBUG, STACK_POINTER_INIT};
+use crate::common::constants::{DEBUG, PC_START_ADDRESS, PRG_ROM_START, STACK_POINTER_INIT};
 use crate::common::errors::EmulatorError;
 use crate::cpu::opcode::{get_opcode};
 use crate::cpu::types::{AddressingMode, ProcessorStatus};
@@ -60,12 +60,12 @@ impl CPU {
 
     pub fn load(&mut self, program: Vec<u8>) -> Result<(), EmulatorError> {
         self.write_program(program)?;
-        self.write_u16(0xFFFC, 0x0600)?;
+        self.write_u16(PC_START_ADDRESS, 0x0600)?;
         Ok(())
     }
 
     pub fn reset(&mut self) {
-        self.program_counter = self.read_u16(0xFFFC).unwrap();
+        self.program_counter = self.read_u16(PC_START_ADDRESS).unwrap();
         self.stack_pointer = STACK_POINTER_INIT;
         self.register_a = 0;
         self.register_x = 0;
@@ -346,8 +346,9 @@ impl CPU {
     }
 
     fn write_program(&mut self, program: Vec<u8>) -> Result<(), EmulatorError> {
+        let offset = PRG_ROM_START;
         for (i, byte) in program.iter().enumerate() {
-            self.write(0x0600 + i as u16, *byte)?;
+            self.write(offset + i as u16, *byte)?;
         }
         Ok(())
     }

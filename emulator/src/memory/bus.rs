@@ -1,15 +1,15 @@
 use crate::memory::memory::Memory;
 use crate::common::errors::EmulatorError;
-use crate::common::constants::{PPU_END, PPU_START, RAM_END, RAM_SIZE, RAM_START};
+use crate::common::constants::{PC_START_ADDRESS, PPU_END, PPU_START, RAM_END, RAM_SIZE, RAM_START, MEMORY_SIZE, PRG_ROM_START, PRG_ROM_END};
 
 pub struct Bus {
-   cpu_ram: [u8; RAM_SIZE]
+   memory: [u8; MEMORY_SIZE]
 }
 
 impl Bus {
    pub fn new() -> Self{
        Bus {
-           cpu_ram: [0; RAM_SIZE]
+           memory: [0; MEMORY_SIZE]
        }
    }
 }
@@ -18,10 +18,13 @@ impl Memory for Bus {
         match address {
             RAM_START ..= RAM_END => {
                 let mirror_address = (address % RAM_SIZE as u16) as usize;
-                Ok(self.cpu_ram[mirror_address])
+                Ok(self.memory[mirror_address])
             }
             PPU_START ..= PPU_END => {
                 Err(EmulatorError::AccessViolation(address))
+            }
+            PRG_ROM_START ..= PRG_ROM_END => {
+                Ok(self.memory[address as usize])
             }
             _ => {
                 Err(EmulatorError::AccessViolation(address))
@@ -39,11 +42,15 @@ impl Memory for Bus {
         match address {
             RAM_START ..= RAM_END => {
                 let mirror_address = (address % RAM_SIZE as u16) as usize;
-                self.cpu_ram[mirror_address] = data;
+                self.memory[mirror_address] = data;
                 Ok(())
             }
             PPU_START ..= PPU_END => {
                 Err(EmulatorError::AccessViolation(address))
+            }
+            PRG_ROM_START ..= PRG_ROM_END => {
+                self.memory[address as usize] = data;
+                Ok(())
             }
             _ => {
                 Err(EmulatorError::AccessViolation(address))

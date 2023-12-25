@@ -7,7 +7,7 @@ mod test {
     fn initialize_cpu() -> CPU {
         let mut cpu = CPU::new();
         cpu.tests = true;
-        cpu.program_counter = 0x8000;
+        cpu.program_counter = PRG_ROM_START;
         cpu
     }
 
