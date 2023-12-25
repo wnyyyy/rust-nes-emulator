@@ -22,6 +22,10 @@ lazy_static! {
         map.insert(0x68D, "checkCollision");
         map.insert(0x694, "checkAppleCollision");
         map.insert(0x6A8, "checkSnakeCollision");
+        map.insert(0x6C3, "updateSnake");
+        map.insert(0x719, "drawApple");
+        map.insert(0x720, "drawSnake");
+        map.insert(0x72D, "spinWheels");
         map.insert(0x735, "gameOver");
         map
         };
