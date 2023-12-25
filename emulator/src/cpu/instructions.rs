@@ -1,4 +1,4 @@
-use crate::common::constants::{DEBUG, IRQ_VECTOR, STACK_START};
+use crate::common::constants::{DEBUG, get_alias, IRQ_VECTOR, STACK_START};
 use crate::common::errors::EmulatorError;
 use crate::common::util::{is_negative, overflows_negative, overflows_positive};
 use crate::cpu::CPU;
@@ -163,6 +163,10 @@ pub fn cmp(cpu: &mut CPU, param: u8) {
     cpu.status.zero = result == 0;
     cpu.status.negative = is_negative(result);
     cpu.status.carry = cpu.register_a >= param;
+    if DEBUG {
+        print!("\n  Comparing A: {:02X} to {:02X} | Result: {:02X} | Zero: {} | Negative: {} | Carry: {}",
+            cpu.register_a, param, result, cpu.status.zero, cpu.status.negative, cpu.status.carry);
+    }
 }
 
 pub fn cpx(cpu: &mut CPU, param: u8) {
@@ -170,10 +174,6 @@ pub fn cpx(cpu: &mut CPU, param: u8) {
     cpu.status.zero = result == 0;
     cpu.status.negative = is_negative(result);
     cpu.status.carry = cpu.register_x >= param;
-    if DEBUG {
-        print!("\n  Comparing X: {:02X} to {:02X} | zero: {}, negative: {}, carry: {}",
-               cpu.register_x, param, cpu.status.zero, cpu.status.negative, cpu.status.carry);
-    }
 }
 
 pub fn cpy(cpu: &mut CPU, param: u8) {
@@ -263,6 +263,10 @@ pub fn ror(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError>{
 
 pub fn jmp(cpu: &mut CPU, address: u16) {
     cpu.program_counter = address;
+    if DEBUG {
+        let alias = get_alias(address);
+        print!("\n  Jumped to address: {:04X} | Alias: {}", address, alias);
+    }
 }
 
 pub fn bcc(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
@@ -288,7 +292,9 @@ pub fn beq(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     if cpu.status.zero {
         let offset = address;
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
-        print!("\n  Offset: {:02X} | New PC: {:04X}", offset, cpu.program_counter);
+        if DEBUG {
+            print!("\n  Offset: {:02X} | New PC: {:04X}", offset, cpu.program_counter);
+        }
     }
     Ok(())
 }
@@ -302,9 +308,15 @@ pub fn bmi(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
 }
 
 pub fn bne(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    if DEBUG {
+        print!("\n  Zero: {}", cpu.status.zero);
+    }
     if !cpu.status.zero {
-        let offset = cpu.memory.read(address)?;
+        let offset = address;
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
+        if DEBUG {
+            print!("\n  Offset: {:02X} | New PC: {:04X}", offset, cpu.program_counter);
+        }
     }
     Ok(())
 }
@@ -397,7 +409,8 @@ pub fn jsr(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     stack_push(cpu, return_address_low)?;
 
     if DEBUG {
-        print!("\n  Jumped to address: {:04X}", address);
+        let alias = get_alias(address);
+        print!("\n  Jumped to address: {:04X} | Alias: {}", address, alias);
         print!("\n  Stored address: {:02X}{:02X}", return_address_high, return_address_low);
     }
 
