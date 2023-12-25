@@ -1,6 +1,6 @@
 use crate::memory::memory::Memory;
 use crate::common::errors::EmulatorError;
-use crate::common::constants::{PC_START_ADDRESS, PPU_END, PPU_START, RAM_END, RAM_SIZE, RAM_START, MEMORY_SIZE, PRG_ROM_START, PRG_ROM_END};
+use crate::common::constants::{PPU_END, PPU_START, RAM_END, RAM_SIZE, RAM_START, MEMORY_SIZE, PRG_ROM_START, PRG_ROM_END};
 
 pub struct Bus {
    memory: [u8; MEMORY_SIZE]
@@ -13,6 +13,7 @@ impl Bus {
        }
    }
 }
+
 impl Memory for Bus {
     fn read(&self, address: u16) -> Result<u8, EmulatorError> {
         match address {

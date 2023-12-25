@@ -82,7 +82,7 @@ impl CPU {
             let opcode_u8 = self.read(self.program_counter)?;
             let opcode = get_opcode(opcode_u8).ok_or(EmulatorError::InvalidOpcode(opcode_u8))?;
             let mut increase_pc = true;
-            if DEBUG && self.program_counter < 0x72D {
+            if DEBUG {
                 print!("\nExec: {:?} at PC: {:#04X} | Addressing mode: {:?}", opcode.name, self.program_counter, opcode.address_mode);
                 if opcode.bytes == 2 {
                     let byte = self.read(self.program_counter + 1)?;
