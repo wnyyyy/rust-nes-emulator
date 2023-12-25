@@ -269,77 +269,57 @@ pub fn jmp(cpu: &mut CPU, address: u16) {
     }
 }
 
-pub fn bcc(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+pub fn bcc(cpu: &mut CPU, offset: u8) -> Result<(), EmulatorError> {
     if !cpu.status.carry {
-        let offset = cpu.memory.read(address)?;
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
     }
     Ok(())
 }
 
-pub fn bcs(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+pub fn bcs(cpu: &mut CPU, offset: u8) -> Result<(), EmulatorError> {
     if cpu.status.carry {
-        let offset = cpu.memory.read(address)?;
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
     }
     Ok(())
 }
 
-pub fn beq(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
-    if DEBUG {
-        print!("\n  Zero: {}", cpu.status.zero);
-    }
+pub fn beq(cpu: &mut CPU, offset: u8) -> Result<(), EmulatorError> {
     if cpu.status.zero {
-        let offset = address;
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
-        if DEBUG {
-            print!("\n  Offset: {:02X} | New PC: {:04X}", offset, cpu.program_counter);
-        }
     }
     Ok(())
 }
 
-pub fn bmi(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+pub fn bmi(cpu: &mut CPU, offset: u8) -> Result<(), EmulatorError> {
     if cpu.status.negative {
-        let offset = cpu.memory.read(address)?;
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
     }
     Ok(())
 }
 
-pub fn bne(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
-    if DEBUG {
-        print!("\n  Zero: {}", cpu.status.zero);
-    }
+pub fn bne(cpu: &mut CPU, offset: u8) -> Result<(), EmulatorError> {
     if !cpu.status.zero {
-        let offset = address;
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
-        if DEBUG {
-            print!("\n  Offset: {:02X} | New PC: {:04X}", offset, cpu.program_counter);
-        }
     }
     Ok(())
 }
 
-pub fn bpl(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+pub fn bpl(cpu: &mut CPU, offset: u8) -> Result<(), EmulatorError> {
     if !cpu.status.negative {
-        let offset = cpu.memory.read(address)?;
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
     }
     Ok(())
 }
 
-pub fn bvc(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+pub fn bvc(cpu: &mut CPU, offset: u8) -> Result<(), EmulatorError> {
     if !cpu.status.overflow {
-        let offset = cpu.memory.read(address)?;
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
     }
     Ok(())
 }
 
-pub fn bvs(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+pub fn bvs(cpu: &mut CPU, offset: u8) -> Result<(), EmulatorError> {
     if cpu.status.overflow {
-        let offset = cpu.memory.read(address)?;
         cpu.program_counter = cpu.program_counter.wrapping_add(offset as u16);
     }
     Ok(())

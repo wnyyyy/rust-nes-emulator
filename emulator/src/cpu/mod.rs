@@ -226,35 +226,35 @@ impl CPU {
                     increase_pc = false;
                 }
                 "BCC" => {
-                    let offset = self.get_param_address(&opcode.address_mode)?;
+                    let offset = self.get_param_address(&opcode.address_mode)? as u8;
                     instructions::bcc(self, offset)?;
                 }
                 "BCS" => {
-                    let offset = self.get_param_address(&opcode.address_mode)?;
+                    let offset = self.get_param_address(&opcode.address_mode)? as u8;
                     instructions::bcs(self, offset)?;
                 }
                 "BEQ" => {
-                    let offset = self.get_param_address(&opcode.address_mode)?;
+                    let offset = self.get_param_address(&opcode.address_mode)? as u8;
                     instructions::beq(self, offset)?;
                 }
                 "BMI" => {
-                    let offset = self.get_param_address(&opcode.address_mode)?;
+                    let offset = self.get_param_address(&opcode.address_mode)? as u8;
                     instructions::bmi(self, offset)?;
                 }
                 "BNE" => {
-                    let offset = self.get_param_address(&opcode.address_mode)?;
+                    let offset = self.get_param_address(&opcode.address_mode)? as u8;
                     instructions::bne(self, offset)?;
                 }
                 "BPL" => {
-                    let offset = self.get_param_address(&opcode.address_mode)?;
+                    let offset = self.get_param_address(&opcode.address_mode)? as u8;
                     instructions::bpl(self, offset)?;
                 }
                 "BVC" => {
-                    let offset = self.get_param_address(&opcode.address_mode)?;
+                    let offset = self.get_param_address(&opcode.address_mode)? as u8;
                     instructions::bvc(self, offset)?;
                 }
                 "BVS" => {
-                    let offset = self.get_param_address(&opcode.address_mode)?;
+                    let offset = self.get_param_address(&opcode.address_mode)? as u8;
                     instructions::bvs(self, offset)?;
                 }
                 // Stack
