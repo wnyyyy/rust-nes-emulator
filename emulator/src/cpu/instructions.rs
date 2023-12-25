@@ -1,9 +1,9 @@
-use crate::common::constants::{DEBUG, get_alias, IRQ_VECTOR, STACK_START};
+use crate::common::constants::{DEBUG, IRQ_VECTOR, STACK_START};
 use crate::common::errors::EmulatorError;
 use crate::common::util::{is_negative, overflows_negative, overflows_positive};
-use crate::cpu::CPU;
-use crate::memory::memory::Memory;
 use crate::cpu::types::ProcessorStatus;
+use crate::cpu::cpu::CPU;
+use crate::memory::memory::Memory;
 
 pub fn lda(cpu: &mut CPU, param: u8) {
     cpu.register_a = param;
@@ -265,8 +265,7 @@ pub fn ror(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError>{
 pub fn jmp(cpu: &mut CPU, address: u16) {
     cpu.program_counter = address;
     if DEBUG {
-        let alias = get_alias(address);
-        print!("\n  Jumped to address: {:04X} | Alias: {}", address, alias);
+        print!("\n  Jumped to address: {:04X}", address);
     }
 }
 
@@ -390,8 +389,7 @@ pub fn jsr(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     stack_push(cpu, return_address_low)?;
 
     if DEBUG {
-        let alias = get_alias(address);
-        print!("\n  Jumped to address: {:04X} | Alias: {}", address, alias);
+        print!("\n  Jumped to address: {:04X}", address);
         print!("\n  Stored address: {:02X}{:02X}", return_address_high, return_address_low);
     }
 
