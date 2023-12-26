@@ -34,9 +34,9 @@ impl Rom {
         }
 
         let mirroring = match (ctrl_byte_1 & 0b0000_1000 != 0, ctrl_byte_1 & 0b0000_0001 != 0) {
-            (true, _) => Mirroring::FOUR_SCREEN,
-            (false, true) => Mirroring::VERTICAL,
-            (false, false) => Mirroring::HORIZONTAL,
+            (true, _) => Mirroring::FourScreen,
+            (false, true) => Mirroring::Vertical,
+            (false, false) => Mirroring::Horizontal,
         };
 
         let mapper_upper = ctrl_byte_2 & 0b1111_0000;
