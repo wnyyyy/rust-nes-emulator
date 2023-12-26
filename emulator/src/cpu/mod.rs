@@ -53,15 +53,8 @@ impl CPU {
             bus: Bus::new(),
         }
     }
-
-    pub fn load_and_run(&mut self, program: Vec<u8>) -> Result<(), EmulatorError> {
-        self.load(program)?;
-        self.run(|_| Ok(()))
-    }
-
+    
     pub fn load(&mut self, program: Vec<u8>) -> Result<(), EmulatorError> {
-        self.write_program(program)?;
-        self.write_u16(PC_START_ADDRESS, 0x0600)?;
         Ok(())
     }
 
@@ -343,15 +336,6 @@ impl CPU {
                 self.program_counter += opcode.bytes as u16;
             }
         }
-        Ok(())
-    }
-
-    fn write_program(&mut self, program: Vec<u8>) -> Result<(), EmulatorError> {
-        let mut rom = Rom::default();
-        for (i, byte) in program.iter().enumerate() {
-            rom.prg_rom[i] = *byte;
-        }
-        self.bus.load_rom(rom);
         Ok(())
     }
 
