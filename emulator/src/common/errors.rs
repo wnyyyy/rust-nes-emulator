@@ -6,6 +6,7 @@ pub enum EmulatorError {
     UnimplementedOpcode(u8),
     UnimplementedAddressingMode(String),
     AccessViolation(u16),
+    InvalidNesFile,
 }
 
 impl fmt::Display for EmulatorError {
@@ -15,6 +16,7 @@ impl fmt::Display for EmulatorError {
             EmulatorError::UnimplementedOpcode(opcode) => write!(f, "Unimplemented opcode: {:x}", opcode),
             EmulatorError::UnimplementedAddressingMode(name) => write!(f, "Address mode does not have a parameter address: {}", name),
             EmulatorError::AccessViolation(address) => write!(f, "Access violation at address: {:x}", address),
+            EmulatorError::InvalidNesFile => write!(f, "Invalid iNES file."),
         }
     }
 }
