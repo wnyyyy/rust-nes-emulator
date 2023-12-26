@@ -18,6 +18,15 @@ impl Rom {
         Ok(Rom { prg_rom, chr_rom, mapper, mirroring })
     }
 
+    pub fn default() -> Self {
+        Rom {
+            prg_rom: vec![0; PRG_ROM_PAGE_SIZE],
+            chr_rom: vec![0; CHR_ROM_PAGE_SIZE],
+            mapper: 0,
+            mirroring: Mirroring::Horizontal,
+        }
+    }
+
     fn validate_file_format(bytes: &[u8]) -> Result<(), EmulatorError> {
         if bytes.starts_with(&NES_TAG) {
             Ok(())

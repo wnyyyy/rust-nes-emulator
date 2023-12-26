@@ -1,1 +1,1 @@
-mod rom;
+pub mod rom;
