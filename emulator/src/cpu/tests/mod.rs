@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod test {
-    use crate::common::constants::{IRQ_VECTOR, RAM_SIZE};
+    use crate::common::constants::{IRQ_VECTOR, RAM_SIZE, PRG_ROM_START};
     use crate::cpu::opcode::get_opcode_by_name_and_address_mode;
     use super::super::*;
 
