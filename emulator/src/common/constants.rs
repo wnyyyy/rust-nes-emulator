@@ -1,5 +1,4 @@
 pub const RAM_SIZE: usize = 2048;
-pub const MEMORY_SIZE: usize = 65536;
 pub const RAM_START: u16 = 0x0000;
 pub const RAM_END: u16 = 0x1FFF;
 pub const PPU_START: u16 = 0x2000;

@@ -7,6 +7,7 @@ pub enum EmulatorError {
     UnimplementedAddressingMode(String),
     AccessViolation(u16),
     InvalidNesFile,
+    RomNotLoaded,
 }
 
 impl fmt::Display for EmulatorError {
@@ -17,6 +18,7 @@ impl fmt::Display for EmulatorError {
             EmulatorError::UnimplementedAddressingMode(name) => write!(f, "Address mode does not have a parameter address: {}", name),
             EmulatorError::AccessViolation(address) => write!(f, "Access violation at address: {:x}", address),
             EmulatorError::InvalidNesFile => write!(f, "Invalid iNES file."),
+            EmulatorError::RomNotLoaded => write!(f, "No loaded rom."),
         }
     }
 }
