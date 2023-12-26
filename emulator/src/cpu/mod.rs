@@ -3,7 +3,7 @@ mod types;
 mod instructions;
 mod tests;
 
-use crate::common::constants::{DEBUG, PC_START_ADDRESS, PRG_ROM_START, STACK_POINTER_INIT};
+use crate::common::constants::{DEBUG, PC_START_ADDRESS, STACK_POINTER_INIT};
 use crate::common::errors::EmulatorError;
 use crate::cpu::opcode::{get_opcode};
 use crate::cpu::types::{AddressingMode, ProcessorStatus};
@@ -54,7 +54,9 @@ impl CPU {
         }
     }
     
-    pub fn load(&mut self, program: Vec<u8>) -> Result<(), EmulatorError> {
+    pub fn load(&mut self, rom: &Vec<u8>) -> Result<(), EmulatorError> {
+        let rom = Rom::new(rom)?;
+        self.bus.load_rom(rom);
         Ok(())
     }
 
