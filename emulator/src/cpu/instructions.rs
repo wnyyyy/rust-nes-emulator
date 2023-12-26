@@ -2,7 +2,7 @@ use crate::common::constants::{DEBUG, IRQ_VECTOR, STACK_START};
 use crate::common::errors::EmulatorError;
 use crate::common::util::{is_negative, overflows_negative, overflows_positive};
 use crate::cpu::types::ProcessorStatus;
-use crate::cpu::cpu::CPU;
+use crate::cpu::CPU;
 use crate::memory::memory::Memory;
 
 pub fn lda(cpu: &mut CPU, param: u8) {
