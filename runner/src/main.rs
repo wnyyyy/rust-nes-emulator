@@ -25,7 +25,7 @@ fn main() {
         .create_texture_target(PixelFormatEnum::RGB24, 32, 32).unwrap();
     let mut screen_state = [0u8; 32 * 3 * 32];
     let mut rng = rand::thread_rng();
-    let game = get_rom("././snake.nes").expect("TODO: panic message");
+    let game = get_rom("../test roms/snake.nes").expect("TODO: panic message");
     cpu.load(&game).expect("TODO: panic message");
     cpu.reset();
     cpu.run(move |cpu| Ok({
