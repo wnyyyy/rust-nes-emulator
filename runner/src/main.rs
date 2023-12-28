@@ -16,7 +16,7 @@ fn main() {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let window = video_subsystem
-        .window("Snake game", (32.0 * 10.0) as u32, (32.0 * 10.0) as u32)
+        .window("Emulator", (32.0 * 10.0) as u32, (32.0 * 10.0) as u32)
         .position_centered()
         .build().unwrap();
 
@@ -28,7 +28,7 @@ fn main() {
         .create_texture_target(PixelFormatEnum::RGB24, 32, 32).unwrap();
     let mut screen_state = [0u8; 32 * 3 * 32];
     let mut rng = rand::thread_rng();
-    let game = get_rom("../test roms/snake.nes").expect("TODO: panic message");
+    let game = get_rom("../test roms/nestest.nes").expect("TODO: panic message");
     cpu.load(&game).expect("TODO: panic message");
     cpu.reset();
     let log_lines = Rc::new(RefCell::new(Vec::new()));
