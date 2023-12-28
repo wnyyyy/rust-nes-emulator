@@ -1,5 +1,7 @@
+use std::cell::RefCell;
 use std::fs::File;
-use std::io::{self, Read};
+use std::io::{self, Read, Write};
+use std::rc::Rc;
 use rand::Rng;
 use sdl2::event::Event;
 use sdl2::EventPump;
@@ -7,6 +9,7 @@ use sdl2::keyboard::Keycode;
 use sdl2::pixels::{Color, PixelFormatEnum};
 use emulator::cpu::CPU;
 use emulator::memory::memory::Memory;
+use emulator::common::logger::trace;
 
 fn main() {
     let mut cpu = CPU::new();
@@ -28,7 +31,10 @@ fn main() {
     let game = get_rom("../test roms/snake.nes").expect("TODO: panic message");
     cpu.load(&game).expect("TODO: panic message");
     cpu.reset();
+    let log_lines = Rc::new(RefCell::new(Vec::new()));
+    let log_lines_clone = log_lines.clone();
     cpu.run(move |cpu| Ok({
+        log_lines_clone.borrow_mut().push(trace(cpu)?);
         handle_user_input(cpu, &mut event_pump);
         cpu.write(0xfe, rng.gen_range(1..16)).expect("TODO: panic message");
 
@@ -40,6 +46,15 @@ fn main() {
 
         ::std::thread::sleep(std::time::Duration::new(0, 5_000));
     })).expect("TODO: panic message");
+    write_log(log_lines.borrow().clone());
+}
+
+fn write_log(log_lines: Vec<String>) {
+    let mut file = File::create("log.txt").expect("TODO: panic message");
+    for line in log_lines {
+        file.write_all(line.as_bytes());
+        file.write_all(b"\n");
+    }
 }
 
 fn get_rom(path: &str) -> io::Result<Vec<u8>> {

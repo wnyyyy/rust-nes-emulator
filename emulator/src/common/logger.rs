@@ -80,7 +80,7 @@ fn get_address_string(mode: AddressingMode, cpu: &CPU, high_byte: Option<u8>, lo
             address.push_str(&format!(" @ {:0>2X} = {:0>2X}", real_address, value));
         }
         AddressingMode::Relative | AddressingMode::Absolute => {
-            address.push_str(&format!("${:0>2X}{:0>2X}", high_byte.unwrap(), low_byte.unwrap()));
+            address.push_str(&format!("${:0>2X}", high_byte.unwrap()));
         }
         AddressingMode::AbsoluteX => {
             address.push_str(&format!("${:0>2X}{:0>2X},X", high_byte.unwrap(), low_byte.unwrap()));
