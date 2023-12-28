@@ -1613,6 +1613,16 @@ mod test {
     }
 
     #[test]
+    fn test_cld() {
+        let code = get_opcode_by_name_and_address_mode("CLI", AddressingMode::Implied).unwrap().code;
+        let program = vec![code, 0, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.status.decimal_mode = true;
+        cpu.run(|_| Ok(())).unwrap();
+        assert!(!cpu.status.decimal_mode);
+    }
+
+    #[test]
     fn test_clv() {
         let code = get_opcode_by_name_and_address_mode("CLV", AddressingMode::Implied).unwrap().code;
         let program = vec![code, 0, 0];
@@ -1638,6 +1648,15 @@ mod test {
         let mut cpu = initialize_cpu(program);
         cpu.run(|_| Ok(())).unwrap();
         assert!(cpu.status.interrupt_disable);
+    }
+
+    #[test]
+    fn test_sed() {
+        let code = get_opcode_by_name_and_address_mode("SED", AddressingMode::Implied).unwrap().code;
+        let program = vec![code, 0, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.run(|_| Ok(())).unwrap();
+        assert!(cpu.status.decimal_mode);
     }
 
     #[test]
