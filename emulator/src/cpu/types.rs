@@ -21,7 +21,7 @@ impl ProcessorStatus {
     }
 
     pub fn to_u8(&self) -> u8 {
-        let mut status = 0b0000_0000;
+        let mut status = 0b0010_0000;
         if self.carry {
             status |= 0b0000_0001;
         }
@@ -55,7 +55,7 @@ impl ProcessorStatus {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum AddressingMode {
     Implied,
     Relative,

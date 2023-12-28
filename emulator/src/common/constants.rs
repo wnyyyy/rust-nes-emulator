@@ -7,7 +7,7 @@ pub const PRG_ROM_START: u16 = 0x8000;
 pub const PRG_ROM_END: u16 = 0xFFFF;
 
 pub const STACK_START: u16 = 0x0100;
-pub const STACK_POINTER_INIT: u8 = 0xFF;
+pub const STACK_POINTER_INIT: u8 = 0xFD;
 pub const IRQ_VECTOR: u16 = 0xFFFE;
 pub const PC_START_ADDRESS: u16 = 0xFFFC;
 
