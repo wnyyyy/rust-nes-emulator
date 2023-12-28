@@ -8,6 +8,7 @@ const PC_WIDTH: usize = 6;
 const CODE_WIDTH: usize = 10;
 const INSTRUCTION_WIDTH: usize = 32;
 const PPU_HALF_WITDH: usize = 4;
+const DATA_LOAD_OPCODES: [&str; 6] = ["LDA", "LDX", "LDY", "STA", "STX", "STY"];
 
 pub fn trace(cpu: &CPU) -> Result<String, EmulatorError> {
     let mut line = String::new();
@@ -40,20 +41,20 @@ fn get_code_str(cpu: &CPU) -> Result<String, EmulatorError> {
 
 fn get_instruction_str(cpu: &CPU) -> Result<String, EmulatorError> {
     let mut instruction = String::new();
-
     let opcode_code = cpu.read(cpu.program_counter)?;
     if let Some(opcode) = get_opcode(opcode_code) {
         instruction.push_str(&format!("{} ", opcode.name));
         let low_byte = if opcode.bytes > 1 { Some(cpu.read(cpu.program_counter + 1)?) } else { None };
         let high_byte = if opcode.bytes == 3 { Some(cpu.read(cpu.program_counter + 2)?) } else { None };
-        instruction.push_str(&get_address_string(opcode.address_mode, cpu, low_byte, high_byte)?);
+        let data_load = DATA_LOAD_OPCODES.contains(&opcode.name);
+        instruction.push_str(&get_address_string(opcode.address_mode, cpu, low_byte, high_byte, data_load)?);
     }
 
     instruction = format!("{:<width$}", instruction, width = INSTRUCTION_WIDTH);
     Ok(instruction)
 }
 
-fn get_address_string(mode: AddressingMode, cpu: &CPU, low_byte: Option<u8>, high_byte: Option<u8>) -> Result<String, EmulatorError> {
+fn get_address_string(mode: AddressingMode, cpu: &CPU, low_byte: Option<u8>, high_byte: Option<u8>, data_load: bool) -> Result<String, EmulatorError> {
     let mut address = String::new();
     match mode {
         AddressingMode::Accumulator => {
@@ -86,6 +87,11 @@ fn get_address_string(mode: AddressingMode, cpu: &CPU, low_byte: Option<u8>, hig
         }
         AddressingMode::Absolute => {
             address.push_str(&format!("${:0>2X}{:0>2X}", high_byte.unwrap(), low_byte.unwrap()));
+            if data_load {
+                let addr = u16::from_le_bytes([low_byte.unwrap(), high_byte.unwrap()]);
+                let value = cpu.read(addr)?;
+                address.push_str(&format!(" = {:0>2X}", value));
+            }
         }
         AddressingMode::AbsoluteX => {
             address.push_str(&format!("${:0>2X}{:0>2X},X", high_byte.unwrap(), low_byte.unwrap()));
