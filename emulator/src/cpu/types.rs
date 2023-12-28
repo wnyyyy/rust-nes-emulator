@@ -3,6 +3,7 @@ pub struct ProcessorStatus {
     pub carry: bool,
     pub zero: bool,
     pub interrupt_disable: bool,
+    pub decimal_mode: bool,
     pub break_command: bool,
     pub overflow: bool,
     pub negative: bool,
@@ -14,6 +15,7 @@ impl ProcessorStatus {
             carry: false,
             zero: false,
             interrupt_disable: false,
+            decimal_mode: false,
             break_command: false,
             overflow: false,
             negative: false,
@@ -30,6 +32,9 @@ impl ProcessorStatus {
         }
         if self.interrupt_disable {
             status |= 0b0000_0100;
+        }
+        if self.decimal_mode {
+            status |= 0b0000_1000;
         }
         if self.break_command {
             status |= 0b0001_0000;
@@ -48,6 +53,7 @@ impl ProcessorStatus {
             carry: status & 0b0000_0001 != 0,
             zero: status & 0b0000_0010 != 0,
             interrupt_disable: status & 0b0000_0100 != 0,
+            decimal_mode: status & 0b0000_1000 != 0,
             break_command: status & 0b0001_0000 != 0,
             overflow: status & 0b0100_0000 != 0,
             negative: status & 0b1000_0000 != 0,

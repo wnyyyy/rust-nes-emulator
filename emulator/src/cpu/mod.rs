@@ -295,7 +295,9 @@ impl CPU {
                 "CLC" => {
                     instructions::clc(self);
                 }
-                "CLD" => {}
+                "CLD" => {
+                    instructions::cld(self);
+                }
                 "CLI" => {
                     instructions::cli(self);
                 }
@@ -305,7 +307,9 @@ impl CPU {
                 "SEC" => {
                     instructions::sec(self);
                 }
-                "SED" => {}
+                "SED" => {
+                    instructions::sed(self);
+                }
                 "SEI" => {
                     instructions::sei(self);
                 }

@@ -368,6 +368,10 @@ pub fn cli(cpu: &mut CPU) {
     cpu.status.interrupt_disable = false;
 }
 
+pub fn cld(cpu: &mut CPU) {
+    cpu.status.decimal_mode = false;
+}
+
 pub fn clv(cpu: &mut CPU) {
     cpu.status.overflow = false;
 }
@@ -378,6 +382,10 @@ pub fn sec(cpu: &mut CPU) {
 
 pub fn sei(cpu: &mut CPU) {
     cpu.status.interrupt_disable = true;
+}
+
+pub fn sed(cpu: &mut CPU) {
+    cpu.status.decimal_mode = true;
 }
 
 pub fn jsr(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
