@@ -31,6 +31,8 @@ fn main() {
     let game = get_rom("../test roms/nestest.nes").expect("TODO: panic message");
     cpu.load(&game).expect("TODO: panic message");
     cpu.reset();
+    cpu.program_counter = 0xc000;
+    cpu.status.interrupt_disable = true;
     let log_lines = Rc::new(RefCell::new(Vec::new()));
     let log_lines_clone = log_lines.clone();
     let run = cpu.run(move |cpu| Ok({

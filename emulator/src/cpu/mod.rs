@@ -12,12 +12,12 @@ use crate::cartridge::rom::Rom;
 
 pub struct CPU {
     tests: bool,
-    pub(crate) program_counter: u16,
-    pub(crate) stack_pointer: u8,
-    pub(crate) register_a: u8,
-    pub(crate) register_x: u8,
-    pub(crate) register_y: u8,
-    pub(crate) status: ProcessorStatus,
+    pub program_counter: u16,
+    pub stack_pointer: u8,
+    pub register_a: u8,
+    pub register_x: u8,
+    pub register_y: u8,
+    pub status: ProcessorStatus,
     pub(crate) bus: Bus,
 }
 
@@ -59,13 +59,14 @@ impl CPU {
         Ok(())
     }
 
-    pub fn reset(&mut self) {
-        self.program_counter = self.read_u16(PC_START_ADDRESS).unwrap();
+    pub fn reset(&mut self) -> Result<(), EmulatorError> {
+        self.program_counter = self.read_u16(PC_START_ADDRESS)?;
         self.stack_pointer = STACK_POINTER_INIT;
         self.register_a = 0;
         self.register_x = 0;
         self.register_y = 0;
         self.status = ProcessorStatus::new();
+        Ok(())
     }
 
     pub fn run<F>(&mut self, mut callback: F) -> Result<(), EmulatorError>
