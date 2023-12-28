@@ -33,7 +33,7 @@ fn main() {
     cpu.reset();
     let log_lines = Rc::new(RefCell::new(Vec::new()));
     let log_lines_clone = log_lines.clone();
-    cpu.run(move |cpu| Ok({
+    let run = cpu.run(move |cpu| Ok({
         log_lines_clone.borrow_mut().push(trace(cpu)?);
         handle_user_input(cpu, &mut event_pump);
         cpu.write(0xfe, rng.gen_range(1..16)).expect("TODO: panic message");
@@ -45,12 +45,15 @@ fn main() {
         }
 
         ::std::thread::sleep(std::time::Duration::new(0, 5_000));
-    })).expect("TODO: panic message");
+    }));
+    if let Err(e) = run {
+        println!("\n\nError: {:?}", e);
+    }
     write_log(log_lines.borrow().clone());
 }
 
 fn write_log(log_lines: Vec<String>) {
-    let mut file = File::create("log.txt").expect("TODO: panic message");
+    let mut file = File::create("../log.txt").expect("TODO: panic message");
     for line in log_lines {
         file.write_all(line.as_bytes());
         file.write_all(b"\n");
