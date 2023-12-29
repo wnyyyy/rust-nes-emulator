@@ -53,7 +53,13 @@ impl Memory for Bus {
 
     fn read_u16(&self, address: u16) -> Result<u16, EmulatorError> {
         let low_byte = self.read(address)?;
-        let high_byte = self.read(address + 1)?;
+        let high_byte = self.read(address.wrapping_add(1))?;
+        Ok(u16::from_le_bytes([low_byte, high_byte]))
+    }
+
+    fn read_u16_zero_page(&self, address: u8) -> Result<u16, EmulatorError> {
+        let low_byte = self.read(address as u16)?;
+        let high_byte = self.read(address.wrapping_add(1) as u16)?;
         Ok(u16::from_le_bytes([low_byte, high_byte]))
     }
 

@@ -113,7 +113,7 @@ fn get_address_string(mode: AddressingMode, cpu: &CPU, low_byte: Option<u8>, hig
         AddressingMode::IndexedIndirect => {
             address.push_str(&format!("(${:0>2X},X)", low_byte.unwrap()));
             let reference = low_byte.unwrap().wrapping_add(cpu.register_x);
-            let real_address = cpu.read_u16(reference as u16)?;
+            let real_address = cpu.read_u16_zero_page(reference)?;
             let value = cpu.read(real_address)?;
             address.push_str(&format!(" @ {:0>2X} = {:0>4X} = {:0>2X}", reference, real_address, value));
         }

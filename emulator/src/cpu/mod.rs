@@ -34,6 +34,10 @@ impl Memory for CPU {
         self.bus.read_u16(address)
     }
 
+    fn read_u16_zero_page(&self, address: u8) -> Result<u16, EmulatorError> {
+        self.bus.read_u16_zero_page(address)
+    }
+
     fn write_u16(&mut self, address: u16, value: u16) -> Result<(), EmulatorError> {
         self.bus.write_u16(address, value)
     }
@@ -379,7 +383,7 @@ impl CPU {
             }
             AddressingMode::IndexedIndirect => {
                 let address = self.read(param)?.wrapping_add(self.register_x);
-                Ok(self.read_u16(address as u16)?)
+                Ok(self.read_u16_zero_page(address)?)
             }
             AddressingMode::IndirectIndexed => {
                 let address = self.read(param)?;
