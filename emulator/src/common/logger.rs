@@ -109,6 +109,9 @@ fn get_address_string(mode: AddressingMode, cpu: &CPU, low_byte: Option<u8>, hig
         }
         AddressingMode::Indirect => {
             address.push_str(&format!("(${:0>2X}{:0>2X})", high_byte.unwrap(), low_byte.unwrap()));
+            let addr = u16::from_le_bytes([low_byte.unwrap(), high_byte.unwrap()]);
+            let value = cpu.read_u16(addr)?;
+            address.push_str(&format!(" = {:0>4X}", value));
         }
         AddressingMode::IndexedIndirect => {
             address.push_str(&format!("(${:0>2X},X)", low_byte.unwrap()));
