@@ -8,7 +8,7 @@ const PC_WIDTH: usize = 6;
 const CODE_WIDTH: usize = 10;
 const INSTRUCTION_WIDTH: usize = 32;
 const PPU_HALF_WITDH: usize = 4;
-const DATA_LOAD_OPCODES: [&str; 6] = ["LDA", "LDX", "LDY", "STA", "STX", "STY"];
+const NO_DATA_LOAD_OPCODES: [&str; 2] = ["JMP", "JSR"];
 
 pub fn trace(cpu: &CPU) -> Result<String, EmulatorError> {
     let mut line = String::new();
@@ -46,7 +46,7 @@ fn get_instruction_str(cpu: &CPU) -> Result<String, EmulatorError> {
         instruction.push_str(&format!("{} ", opcode.name));
         let low_byte = if opcode.bytes > 1 { Some(cpu.read(cpu.program_counter + 1)?) } else { None };
         let high_byte = if opcode.bytes == 3 { Some(cpu.read(cpu.program_counter + 2)?) } else { None };
-        let data_load = DATA_LOAD_OPCODES.contains(&opcode.name);
+        let data_load = !NO_DATA_LOAD_OPCODES.contains(&opcode.name);
         instruction.push_str(&get_address_string(opcode.address_mode, cpu, low_byte, high_byte, data_load)?);
     }
 
