@@ -387,7 +387,7 @@ impl CPU {
             }
             AddressingMode::IndirectIndexed => {
                 let address = self.read(param)?;
-                Ok(self.read_u16(address as u16)?.wrapping_add(self.register_y as u16))
+                Ok(self.read_u16_zero_page(address)?.wrapping_add(self.register_y as u16))
             }
             AddressingMode::Relative => {
                 let address = self.read(param)?;
