@@ -1,7 +1,9 @@
+use std::fs::File;
+use std::io::Write;
 use crate::memory::memory::Memory;
 use crate::cartridge::rom::Rom;
 use crate::common::errors::EmulatorError;
-use crate::common::constants::{PPU_END, PPU_START, RAM_END, RAM_SIZE, RAM_START, PRG_ROM_START, PRG_ROM_END, PRG_ROM_PAGE_SIZE};
+use crate::common::constants::{PPU_END, PPU_START, RAM_END, RAM_SIZE, RAM_START, PRG_ROM_START, PRG_ROM_END, PRG_ROM_PAGE_SIZE, DEBUG};
 
 pub struct Bus {
    cpu_ram: [u8; RAM_SIZE],
@@ -18,6 +20,19 @@ impl Bus {
 
     pub fn load_rom(&mut self, rom: Rom) {
          self.rom = Some(rom);
+    }
+
+    pub fn dump_memory(&self) {
+        let mut dump = String::new();
+        let prg_rom= &self.rom.as_ref().unwrap().prg_rom;
+        for i in 0..RAM_SIZE {
+            dump.push_str(&format!("\n{:0>4x}: {:0>2X} ", i, self.cpu_ram[i]));
+        }
+        for i in 0..prg_rom.len() {
+            dump.push_str(&format!("\n{:0>4x}: {:0>2X} ", i + PRG_ROM_START as usize, prg_rom[i]));
+        }
+        let mut file = File::create("../dump.txt").expect("TODO: panic message");
+        let _ = file.write_all(dump.as_bytes());
     }
 }
 
@@ -36,7 +51,8 @@ impl Memory for Bus {
                 match &self.rom {
                     Some(rom) => Ok({
                         if rom.prg_rom.len() == PRG_ROM_PAGE_SIZE && v_address >= PRG_ROM_PAGE_SIZE as u16 {
-                            rom.prg_rom[(v_address % PRG_ROM_PAGE_SIZE as u16) as usize]
+                            let v_address = v_address % PRG_ROM_PAGE_SIZE as u16;
+                            rom.prg_rom[v_address as usize]
                         }
                         else {
                             rom.prg_rom[v_address as usize]
