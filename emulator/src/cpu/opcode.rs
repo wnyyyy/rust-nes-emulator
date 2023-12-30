@@ -52,9 +52,9 @@ lazy_static! {
         add_opcode(m, Opcode::new("LDX", 0xBE, 3, 4, AddressingMode::AbsoluteY));
         add_opcode(m, Opcode::new("LDY", 0xA0, 2, 2, AddressingMode::Immediate));
         add_opcode(m, Opcode::new("LDY", 0xA4, 2, 3, AddressingMode::ZeroPage));
-        add_opcode(m, Opcode::new("LDY", 0xB4, 2, 4, AddressingMode::ZeroPageY));
+        add_opcode(m, Opcode::new("LDY", 0xB4, 2, 4, AddressingMode::ZeroPageX));
         add_opcode(m, Opcode::new("LDY", 0xAC, 3, 4, AddressingMode::Absolute));
-        add_opcode(m, Opcode::new("LDY", 0xBC, 3, 4, AddressingMode::AbsoluteY));
+        add_opcode(m, Opcode::new("LDY", 0xBC, 3, 4, AddressingMode::AbsoluteX));
         add_opcode(m, Opcode::new("STA", 0x85, 2, 3, AddressingMode::ZeroPage));
         add_opcode(m, Opcode::new("STA", 0x95, 2, 4, AddressingMode::ZeroPageX));
         add_opcode(m, Opcode::new("STA", 0x8D, 3, 4, AddressingMode::Absolute));
