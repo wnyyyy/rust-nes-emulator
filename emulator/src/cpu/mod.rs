@@ -1,5 +1,6 @@
 pub mod opcode;
 pub mod types;
+mod test;
 mod instructions;
 
 use crate::common::constants::{DEBUG, PC_START_ADDRESS, STACK_POINTER_INIT};
