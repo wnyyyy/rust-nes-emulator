@@ -378,8 +378,15 @@ impl CPU {
                 Ok(address.wrapping_add(self.register_y as u16))
             }
             AddressingMode::Indirect => {
-                let address = self.read_u16(param)?;
-                Ok(self.read_u16(address)?)
+                let reference = self.read_u16(param)?;
+                let address = if reference & 0x00FF == 0x00FF {
+                    let low_byte = self.read(reference)?;
+                    let high_byte = self.read(reference & 0xFF00)?;
+                    u16::from_le_bytes([low_byte, high_byte])
+                } else {
+                    self.read_u16(reference)?
+                };
+                Ok(address)
             }
             AddressingMode::IndexedIndirect => {
                 let address = self.read(param)?.wrapping_add(self.register_x);
