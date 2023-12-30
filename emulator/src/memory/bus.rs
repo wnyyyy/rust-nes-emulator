@@ -3,7 +3,7 @@ use std::io::Write;
 use crate::memory::memory::Memory;
 use crate::cartridge::rom::Rom;
 use crate::common::errors::EmulatorError;
-use crate::common::constants::{PPU_END, PPU_START, RAM_END, RAM_SIZE, RAM_START, PRG_ROM_START, PRG_ROM_END, PRG_ROM_PAGE_SIZE, DEBUG};
+use crate::common::constants::{PPU_END, PPU_START, RAM_END, RAM_SIZE, RAM_START, PRG_ROM_START, PRG_ROM_END, PRG_ROM_PAGE_SIZE};
 
 pub struct Bus {
    cpu_ram: [u8; RAM_SIZE],
