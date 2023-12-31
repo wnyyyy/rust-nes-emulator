@@ -484,6 +484,28 @@ pub fn arr(cpu: &mut CPU, param: u8) {
     cpu.status.negative = is_negative(result);
 }
 
+pub fn asr(cpu: &mut CPU, param: u8) {
+    cpu.register_a &= param;
+    cpu.status.carry = (cpu.register_a & 1) != 0;
+    cpu.register_a = cpu.register_a >> 1;
+    cpu.status.zero = cpu.register_a == 0;
+    cpu.status.negative = is_negative(cpu.register_a);
+}
+
+pub fn atx(cpu: &mut CPU, param: u8) {
+    cpu.register_a &= param;
+    cpu.status.zero = cpu.register_a == 0;
+    cpu.status.negative = is_negative(cpu.register_a);
+    cpu.register_x = cpu.register_a;
+}
+
+pub fn axa(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    let mut result = cpu.register_a & cpu.register_x;
+    result = result & 7;
+    cpu.write(address, result)?;
+    Ok(())
+}
+
 
 pub fn dcp(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     let value = cpu.read(address)?;

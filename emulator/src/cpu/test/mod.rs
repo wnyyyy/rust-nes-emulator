@@ -2033,14 +2033,14 @@ mod test {
 
     #[test]
     fn test_axa() {
-        let code = get_opcode_by_name_and_address_mode("AXA", AddressingMode::Absolute).unwrap().code;
+        let code = get_opcode_by_name_and_address_mode("AXA", AddressingMode::AbsoluteY).unwrap().code;
         let accumulator = 0b1101_1111;
         let x = 0b1111_1011;
         let expected = 0b0000_0011;
         let address_high = 0x1A;
         let address_low = 0xBC;
         let address = (address_high as u16) << 8 | address_low as u16;
-        let program = vec![code, address_high, address_low, 0];
+        let program = vec![code, address_low, address_high, 0];
         let mut cpu = initialize_cpu(program);
         cpu.register_a = accumulator;
         cpu.register_x = x;
