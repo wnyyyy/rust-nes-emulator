@@ -1937,7 +1937,7 @@ mod test {
 
     #[test]
     fn test_asr_positive() {
-        let code = get_opcode_by_name_and_address_mode("ASR", AddressingMode::Accumulator).unwrap().code;
+        let code = get_opcode_by_name_and_address_mode("ASR", AddressingMode::Immediate).unwrap().code;
         let accumulator = 0b1011_0110;
         let param = 0b1001_0111;
         let expected = 0b0100_1011;
@@ -1953,7 +1953,7 @@ mod test {
 
     #[test]
     fn test_asr_carry() {
-        let code = get_opcode_by_name_and_address_mode("ASR", AddressingMode::Accumulator).unwrap().code;
+        let code = get_opcode_by_name_and_address_mode("ASR", AddressingMode::Immediate).unwrap().code;
         let accumulator = 0b0011_0111;
         let param = 0b0010_0111;
         let expected = 0b0001_0011;
@@ -1969,7 +1969,7 @@ mod test {
 
     #[test]
     fn test_asr_zero() {
-        let code = get_opcode_by_name_and_address_mode("ASR", AddressingMode::Accumulator).unwrap().code;
+        let code = get_opcode_by_name_and_address_mode("ASR", AddressingMode::Immediate).unwrap().code;
         let accumulator = 0b0011_0111;
         let param = 0;
         let expected = 0;
@@ -1985,7 +1985,7 @@ mod test {
 
     #[test]
     fn test_atx_positive() {
-        let code = get_opcode_by_name_and_address_mode("ATX", AddressingMode::Accumulator).unwrap().code;
+        let code = get_opcode_by_name_and_address_mode("ATX", AddressingMode::Immediate).unwrap().code;
         let accumulator = 0b1011_0111;
         let param = 0b0010_0011;
         let expected = 0b0010_0011;
@@ -2001,7 +2001,7 @@ mod test {
 
     #[test]
     fn test_atx_negative() {
-        let code = get_opcode_by_name_and_address_mode("ATX", AddressingMode::Accumulator).unwrap().code;
+        let code = get_opcode_by_name_and_address_mode("ATX", AddressingMode::Immediate).unwrap().code;
         let accumulator = 0b1001_0110;
         let param = 0b1111_0011;
         let expected = 0b1001_0010;
@@ -2017,7 +2017,7 @@ mod test {
 
     #[test]
     fn test_atx_zero() {
-        let code = get_opcode_by_name_and_address_mode("ATX", AddressingMode::Accumulator).unwrap().code;
+        let code = get_opcode_by_name_and_address_mode("ATX", AddressingMode::Immediate).unwrap().code;
         let accumulator = 0b1001_0110;
         let param = 0;
         let expected = 0;
@@ -2033,7 +2033,7 @@ mod test {
 
     #[test]
     fn test_axa() {
-        let code = get_opcode_by_name_and_address_mode("AXA", AddressingMode::Accumulator).unwrap().code;
+        let code = get_opcode_by_name_and_address_mode("AXA", AddressingMode::Absolute).unwrap().code;
         let accumulator = 0b1101_1111;
         let x = 0b1111_1011;
         let expected = 0b0000_0011;
@@ -2053,7 +2053,7 @@ mod test {
 
     #[test]
     fn test_axs_positive() {
-        let code = get_opcode_by_name_and_address_mode("AXS", AddressingMode::Accumulator).unwrap().code;
+        let code = get_opcode_by_name_and_address_mode("AXS", AddressingMode::Immediate).unwrap().code;
         let accumulator = 0b1111_1111;
         let x = 0b0011_1100;
         let subtract = 0b0000_1100;
@@ -2072,7 +2072,7 @@ mod test {
 
     #[test]
     fn test_axs_borrow() {
-        let code = get_opcode_by_name_and_address_mode("AXS", AddressingMode::Accumulator).unwrap().code;
+        let code = get_opcode_by_name_and_address_mode("AXS", AddressingMode::Immediate).unwrap().code;
         let accumulator = 0b1010_0000;
         let x = 0b0011_0000;
         let subtract = 0b0100_0000;
@@ -2091,7 +2091,7 @@ mod test {
 
     #[test]
     fn test_axs_negative() {
-        let code = get_opcode_by_name_and_address_mode("AXS", AddressingMode::Accumulator).unwrap().code;
+        let code = get_opcode_by_name_and_address_mode("AXS", AddressingMode::Immediate).unwrap().code;
         let accumulator = 0b1010_0001;
         let x = 0b1011_0001;
         let subtract = 0b0000_0001;
@@ -2110,7 +2110,7 @@ mod test {
 
     #[test]
     fn test_axs_zero() {
-        let code = get_opcode_by_name_and_address_mode("AXS", AddressingMode::Accumulator).unwrap().code;
+        let code = get_opcode_by_name_and_address_mode("AXS", AddressingMode::Immediate).unwrap().code;
         let accumulator = 0b1010_0001;
         let x = 0b1011_0001;
         let subtract = 0b1010_0001;
