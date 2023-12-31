@@ -343,7 +343,9 @@ impl CPU {
                 "NOP" => {}
                 // Unofficial
                 "AAC" => {
-                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    let param = self.read(param_address)?;
+                    instructions::aac(self, param);
                 }
                 "AAX" => {
                     Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;

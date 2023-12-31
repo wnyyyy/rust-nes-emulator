@@ -1752,4 +1752,60 @@ mod test {
         assert_eq!(stored_status, initial_status.to_u8() | 0b0001_0000);
         assert_eq!(stored_pc, initial_pc);
     }
+
+    #[test]
+    fn test_aac_positive() {
+        let code = get_opcode_by_name_and_address_mode("AAC", AddressingMode::Immediate).unwrap().code;
+        let param = 0b0000_0111;
+        let accumulator = 0b1011_0110;
+        let program = vec![code, param, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, 0b0000_0110);
+        assert!(!cpu.status.carry);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.zero);
+
+        let param = 0b1000_0111;
+        let accumulator = 0b1011_0110;
+        let program = vec![code, param, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, 0b1000_0110);
+        assert!(cpu.status.carry);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_aac_negative() {
+        let code = get_opcode_by_name_and_address_mode("AAC", AddressingMode::Immediate).unwrap().code;
+        let param = 0xFF;
+        let accumulator = 0x80;
+        let program = vec![code, param, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a & param, accumulator);
+        assert!(cpu.status.carry);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_aac_zero() {
+        let code = get_opcode_by_name_and_address_mode("AAC", AddressingMode::Immediate).unwrap().code;
+        let param = 0;
+        let accumulator = 0b1011_0110;
+        let program = vec![code, param, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, 0);
+        assert!(!cpu.status.carry);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.zero);
+    }
 }

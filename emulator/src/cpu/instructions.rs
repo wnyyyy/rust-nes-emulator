@@ -437,6 +437,13 @@ pub fn brk(cpu: &mut CPU) -> Result<(), EmulatorError> {
     Ok(())
 }
 
+pub fn aac(cpu: &mut CPU, param: u8) {
+    cpu.register_a &= param;
+    cpu.status.zero = cpu.register_a == 0;
+    cpu.status.negative = is_negative(cpu.register_a);
+    cpu.status.carry = cpu.status.negative;
+}
+
 fn stack_push(cpu: &mut CPU, value: u8) -> Result<(), EmulatorError> {
     let sp_address = cpu.stack_pointer as u16 + STACK_START;
     cpu.write(sp_address, value)?;
