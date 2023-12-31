@@ -451,6 +451,39 @@ pub fn aax(cpu: &mut CPU, address: u16) {
     cpu.status.negative = is_negative(result);
 }
 
+pub fn arr(cpu: &mut CPU, param: u8) {
+    let mut result = cpu.register_a & param;
+    let bit_0 = result & 0b0000_0001;
+    result >>= 1;
+    result |= bit_0 << 7;
+    if cpu.status.carry {
+        result |= 0b1000_0000;
+    }
+    let bit_5 = result & 0b0010_0000 != 0;
+    let bit_6 = result & 0b0100_0000 != 0;
+    match (bit_5, bit_6) {
+        (true, true) => {
+            cpu.status.carry = true;
+            cpu.status.overflow = false;
+        }
+        (false, false) => {
+            cpu.status.carry = false;
+            cpu.status.overflow = false;
+        }
+        (true, false) => {
+            cpu.status.carry = false;
+            cpu.status.overflow = true;
+        }
+        (false, true) => {
+            cpu.status.carry = true;
+            cpu.status.overflow = true;
+        }
+    }
+    cpu.register_a = result;
+    cpu.status.zero = result == 0;
+    cpu.status.negative = is_negative(result);
+}
+
 fn stack_push(cpu: &mut CPU, value: u8) -> Result<(), EmulatorError> {
     let sp_address = cpu.stack_pointer as u16 + STACK_START;
     cpu.write(sp_address, value)?;

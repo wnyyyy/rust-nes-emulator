@@ -1848,4 +1848,90 @@ mod test {
         assert!(!cpu.status.negative);
         assert!(cpu.status.zero);
     }
+
+    #[test]
+    fn test_arr_positive() {
+        let code = get_opcode_by_name_and_address_mode("ARR", AddressingMode::Immediate).unwrap().code;
+        let param = 0b1111_1111;
+        let accumulator = 0b1110_1010;
+        let expected = 0b0111_0101;
+        let program = vec![code, param, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert!(cpu.status.carry);
+        assert!(!cpu.status.overflow);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_arr_positive_2() {
+        let code = get_opcode_by_name_and_address_mode("ARR", AddressingMode::Immediate).unwrap().code;
+        let param = 0b1111_1111;
+        let accumulator = 0b1010_1010;
+        let expected = 0b0101_0101;
+        let program = vec![code, param, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert!(cpu.status.carry);
+        assert!(cpu.status.overflow);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_arr_negative() {
+        let code = get_opcode_by_name_and_address_mode("ARR", AddressingMode::Immediate).unwrap().code;
+        let param = 0b0100_0111;
+        let accumulator = 0b0101_0101;
+        let expected = 0b1010_0010;
+        let program = vec![code, param, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert!(!cpu.status.carry);
+        assert!(cpu.status.overflow);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_arr_negative_2() {
+        let code = get_opcode_by_name_and_address_mode("ARR", AddressingMode::Immediate).unwrap().code;
+        let param = 0b1010_0111;
+        let accumulator = 0b1001_0100;
+        let expected = 0b1100_0010;
+        let program = vec![code, param, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.status.carry = true;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert!(cpu.status.carry);
+        assert!(cpu.status.overflow);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_arr_zero() {
+        let code = get_opcode_by_name_and_address_mode("ARR", AddressingMode::Immediate).unwrap().code;
+        let param = 0;
+        let accumulator = 0b1011_0101;
+        let expected = 0;
+        let program = vec![code, param, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert!(!cpu.status.carry);
+        assert!(!cpu.status.overflow);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.zero);
+    }
 }
