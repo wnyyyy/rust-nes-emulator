@@ -1934,4 +1934,52 @@ mod test {
         assert!(!cpu.status.negative);
         assert!(cpu.status.zero);
     }
+
+    #[test]
+    fn test_asr_positive() {
+        let code = get_opcode_by_name_and_address_mode("ASR", AddressingMode::Accumulator).unwrap().code;
+        let accumulator = 0b1011_0110;
+        let param = 0b1001_0111;
+        let expected = 0b0100_1011;
+        let program = vec![code, param, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert!(!cpu.status.carry);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_asr_carry() {
+        let code = get_opcode_by_name_and_address_mode("ASR", AddressingMode::Accumulator).unwrap().code;
+        let accumulator = 0b0011_0111;
+        let param = 0b0010_0111;
+        let expected = 0b0001_0011;
+        let program = vec![code, param, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert!(cpu.status.carry);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_asr_zero() {
+        let code = get_opcode_by_name_and_address_mode("ASR", AddressingMode::Accumulator).unwrap().code;
+        let accumulator = 0b0011_0111;
+        let param = 0;
+        let expected = 0;
+        let program = vec![code, param, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert!(!cpu.status.carry);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.zero);
+    }
 }
