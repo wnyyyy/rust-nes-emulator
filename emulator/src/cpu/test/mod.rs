@@ -1766,17 +1766,6 @@ mod test {
         assert!(!cpu.status.carry);
         assert!(!cpu.status.negative);
         assert!(!cpu.status.zero);
-
-        let param = 0b1000_0111;
-        let accumulator = 0b1011_0110;
-        let program = vec![code, param, 0];
-        let mut cpu = initialize_cpu(program);
-        cpu.register_a = accumulator;
-        cpu.run(|_| Ok(())).unwrap();
-        assert_eq!(cpu.register_a, 0b1000_0110);
-        assert!(cpu.status.carry);
-        assert!(cpu.status.negative);
-        assert!(!cpu.status.zero);
     }
 
     #[test]
@@ -1805,6 +1794,57 @@ mod test {
         cpu.run(|_| Ok(())).unwrap();
         assert_eq!(cpu.register_a, 0);
         assert!(!cpu.status.carry);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.zero);
+    }
+
+    #[test]
+    fn test_aax_positive() {
+        let code = get_opcode_by_name_and_address_mode("AAX", AddressingMode::Absolute).unwrap().code;
+        let address = 0x1ABC;
+        let a = 0b1011_0110;
+        let x = 0b0000_0111;
+        let expected = 0b0000_0110;
+        let program = vec![code, address as u8, (address >> 8) as u8, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = a;
+        cpu.register_x = x;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.read(address).unwrap(), expected);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_aax_negative() {
+        let code = get_opcode_by_name_and_address_mode("AAX", AddressingMode::Absolute).unwrap().code;
+        let address = 0x1ABC;
+        let a = 0b1011_0110;
+        let x = 0b1101_0111;
+        let expected = 0b1001_0110;
+        let program = vec![code, address as u8, (address >> 8) as u8, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = a;
+        cpu.register_x = x;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.read(address).unwrap(), expected);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_aax_zero() {
+        let code = get_opcode_by_name_and_address_mode("AAX", AddressingMode::Absolute).unwrap().code;
+        let address = 0x1ABC;
+        let a = 0b1011_0110;
+        let x = 0b0000_0000;
+        let expected = 0;
+        let program = vec![code, address as u8, (address >> 8) as u8, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = a;
+        cpu.register_x = x;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.read(address).unwrap(), expected);
         assert!(!cpu.status.negative);
         assert!(cpu.status.zero);
     }

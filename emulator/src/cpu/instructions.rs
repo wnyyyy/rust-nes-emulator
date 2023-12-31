@@ -444,6 +444,13 @@ pub fn aac(cpu: &mut CPU, param: u8) {
     cpu.status.carry = cpu.status.negative;
 }
 
+pub fn aax(cpu: &mut CPU, address: u16) {
+    let result = cpu.register_a & cpu.register_x;
+    cpu.write(address, result).unwrap();
+    cpu.status.zero = result == 0;
+    cpu.status.negative = is_negative(result);
+}
+
 fn stack_push(cpu: &mut CPU, value: u8) -> Result<(), EmulatorError> {
     let sp_address = cpu.stack_pointer as u16 + STACK_START;
     cpu.write(sp_address, value)?;
