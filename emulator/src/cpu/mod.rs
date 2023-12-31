@@ -377,7 +377,6 @@ impl CPU {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
                     instructions::dcp(self, param_address)?;
                 }
-                "DOP" => { }
                 "ISC" => {
                     Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
                 }
@@ -408,7 +407,6 @@ impl CPU {
                 "SYA" => {
                     Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
                 }
-                "TOP" => { }
                 "XAA" => {
                     Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
                 }
