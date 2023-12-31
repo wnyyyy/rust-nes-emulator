@@ -369,7 +369,8 @@ impl CPU {
                     Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
                 }
                 "DCP" => {
-                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    instructions::dcp(self, param_address)?;
                 }
                 "DOP" => {
                     Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;

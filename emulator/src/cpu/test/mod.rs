@@ -2126,4 +2126,64 @@ mod test {
         assert!(!cpu.status.negative);
         assert!(cpu.status.zero);
     }
+
+    #[test]
+    fn test_dcp_carry() {
+        let code = get_opcode_by_name_and_address_mode("DCP", AddressingMode::Absolute).unwrap().code;
+        let value = 0b0000_0011;
+        let accumulator = 0b0010_0010;
+        let address_high = 0x1A;
+        let address_low = 0xBC;
+        let address = (address_high as u16) << 8 | address_low as u16;
+        let program = vec![code, address_low, address_high, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.write(address, value).unwrap();
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address).unwrap();
+        assert_eq!(stored, value.wrapping_sub(1));
+        assert!(cpu.status.carry);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_dcp_zero() {
+        let code = get_opcode_by_name_and_address_mode("DCP", AddressingMode::Absolute).unwrap().code;
+        let value = 0b1010_0011;
+        let accumulator = 0b1010_0010;
+        let address_high = 0x1A;
+        let address_low = 0xBC;
+        let address = (address_high as u16) << 8 | address_low as u16;
+        let program = vec![code, address_low, address_high, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.write(address, value).unwrap();
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address).unwrap();
+        assert_eq!(stored, value.wrapping_sub(1));
+        assert!(cpu.status.carry);
+        assert!(cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_dcp_negative() {
+        let code = get_opcode_by_name_and_address_mode("DCP", AddressingMode::Absolute).unwrap().code;
+        let value = 0b1110_0011;
+        let accumulator = 0b0000_0010;
+        let address_high = 0x1A;
+        let address_low = 0xBC;
+        let address = (address_high as u16) << 8 | address_low as u16;
+        let program = vec![code, address_low, address_high, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.write(address, value).unwrap();
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address).unwrap();
+        assert_eq!(stored, value.wrapping_sub(1));
+        assert!(!cpu.status.carry);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
 }

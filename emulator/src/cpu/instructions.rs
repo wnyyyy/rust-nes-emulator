@@ -484,6 +484,17 @@ pub fn arr(cpu: &mut CPU, param: u8) {
     cpu.status.negative = is_negative(result);
 }
 
+
+pub fn dcp(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    let value = cpu.read(address)?;
+    let decrement = value.wrapping_sub(1);
+    cpu.write(address, decrement)?;
+    cpu.status.zero = cpu.register_a == decrement;
+    cpu.status.negative = is_negative(decrement);
+    cpu.status.carry = cpu.register_a >= decrement;
+    Ok(())
+}
+
 fn stack_push(cpu: &mut CPU, value: u8) -> Result<(), EmulatorError> {
     let sp_address = cpu.stack_pointer as u16 + STACK_START;
     cpu.write(sp_address, value)?;
