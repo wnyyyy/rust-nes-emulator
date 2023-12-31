@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod test {
-    use crate::common::constants::{IRQ_VECTOR, RAM_SIZE, PRG_ROM_START};
+    use crate::common::constants::{IRQ_VECTOR, RAM_SIZE, PRG_ROM_START, STACK_START};
     use crate::cpu::opcode::get_opcode_by_name_and_address_mode;
     use super::super::*;
 
@@ -1373,7 +1373,7 @@ mod test {
     #[test]
     fn test_jmp_indirect() {
         let code = get_opcode_by_name_and_address_mode("JMP", AddressingMode::Indirect).unwrap().code;
-        let jump_address = 0x4EFF;
+        let jump_address = 0x1EFF;
         let address = 0x1ABC;
         let program = vec![code, address as u8, (address >> 8) as u8, 0];
         let mut cpu = initialize_cpu(program);
@@ -1488,7 +1488,7 @@ mod test {
         cpu.stack_pointer = 0x00;
         cpu.run(|_| Ok(())).unwrap();
         assert_eq!(cpu.read(address).unwrap(), 0xAA);
-        assert_eq!(cpu.stack_pointer, STACK_POINTER_INIT);
+        assert_eq!(cpu.stack_pointer, 0xFF);
     }
 
     #[test]
@@ -1515,7 +1515,7 @@ mod test {
         cpu.stack_pointer = 0x00;
         cpu.run(|_| Ok(())).unwrap();
         assert_eq!(cpu.read(address).unwrap(), status.to_u8() | 0b0001_0000);
-        assert_eq!(cpu.stack_pointer, STACK_POINTER_INIT);
+        assert_eq!(cpu.stack_pointer, 0xFF);
     }
 
     #[test]
@@ -1539,11 +1539,11 @@ mod test {
         let code = get_opcode_by_name_and_address_mode("PLA", AddressingMode::Implied).unwrap().code;
         let test_offset = 0xFF;
         let test_value = 0xF0;
-        let address = STACK_POINTER_INIT as u16 + 0x0100 - test_offset;
+        let address = STACK_POINTER_INIT.wrapping_sub(test_offset) as u16 + STACK_START;
         let program = vec![code, 0, 0];
         let mut cpu = initialize_cpu(program);
         cpu.write(address, test_value).unwrap();
-        cpu.stack_pointer = (cpu.stack_pointer - test_offset as u8).wrapping_sub(1);
+        cpu.stack_pointer = address.wrapping_sub(1) as u8;
         cpu.run(|_| Ok(())).unwrap();
         assert_eq!(cpu.register_a, test_value);
         assert!(!cpu.status.zero);
@@ -1610,7 +1610,7 @@ mod test {
 
     #[test]
     fn test_cld() {
-        let code = get_opcode_by_name_and_address_mode("CLI", AddressingMode::Implied).unwrap().code;
+        let code = get_opcode_by_name_and_address_mode("CLD", AddressingMode::Implied).unwrap().code;
         let program = vec![code, 0, 0];
         let mut cpu = initialize_cpu(program);
         cpu.status.decimal_mode = true;
