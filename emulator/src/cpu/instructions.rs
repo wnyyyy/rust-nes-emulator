@@ -499,6 +499,13 @@ pub fn atx(cpu: &mut CPU, param: u8) {
     cpu.register_x = cpu.register_a;
 }
 
+pub fn axa(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    let mut result = cpu.register_a & cpu.register_x;
+    result = result & 7;
+    cpu.write(address, result)?;
+    Ok(())
+}
+
 fn stack_push(cpu: &mut CPU, value: u8) -> Result<(), EmulatorError> {
     let sp_address = cpu.stack_pointer as u16 + STACK_START;
     cpu.write(sp_address, value)?;
