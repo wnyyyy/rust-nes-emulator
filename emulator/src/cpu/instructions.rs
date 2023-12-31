@@ -533,6 +533,15 @@ pub fn isc(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     Ok(())
 }
 
+pub fn lar(cpu: &mut CPU, param: u8) {
+    let result = cpu.stack_pointer & param;
+    cpu.register_a = result;
+    cpu.register_x = result;
+    cpu.stack_pointer = result;
+    cpu.status.zero = result == 0;
+    cpu.status.negative = is_negative(result);
+}
+
 fn stack_push(cpu: &mut CPU, value: u8) -> Result<(), EmulatorError> {
     let sp_address = cpu.stack_pointer as u16 + STACK_START;
     cpu.write(sp_address, value)?;

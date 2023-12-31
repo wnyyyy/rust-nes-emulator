@@ -2306,4 +2306,76 @@ mod test {
         assert!(cpu.status.negative);
         assert!(cpu.status.overflow);
     }
+
+    #[test]
+    fn test_lar_positive() {
+        let code = get_opcode_by_name_and_address_mode("LAR", AddressingMode::AbsoluteY).unwrap().code;
+        let memory_value = 0b0101_0111;
+        let stack_pointer = 0b0010_1111;
+        let expected = 0b0000_0111;
+        let address_high = 0x1A;
+        let address_low = 0x02;
+        let address = (address_high as u16) << 8 | (address_low as u16 + 5);
+        let program = vec![code, address_low, address_high, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.write(address as u16, memory_value as u8).unwrap();
+        cpu.register_y = 5;
+        cpu.stack_pointer = stack_pointer;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address as u16).unwrap();
+        assert_eq!(stored, memory_value);
+        assert_eq!(cpu.stack_pointer, expected);
+        assert_eq!(cpu.register_a, expected);
+        assert_eq!(cpu.register_x, expected);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
+
+    #[test]
+    fn test_lar_negative() {
+        let code = get_opcode_by_name_and_address_mode("LAR", AddressingMode::AbsoluteY).unwrap().code;
+        let memory_value = 0b1101_0111;
+        let stack_pointer = 0b1010_1111;
+        let expected = 0b1000_0111;
+        let address_high = 0x1A;
+        let address_low = 0xBC;
+        let address = (address_high as u16) << 8 | (address_low as u16 + 1);
+        let program = vec![code, address_low, address_high, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.write(address as u16, memory_value as u8).unwrap();
+        cpu.register_y = 1;
+        cpu.stack_pointer = stack_pointer;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address as u16).unwrap();
+        assert_eq!(stored, memory_value);
+        assert_eq!(cpu.stack_pointer, expected);
+        assert_eq!(cpu.register_a, expected);
+        assert_eq!(cpu.register_x, expected);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_lar_zero() {
+        let code = get_opcode_by_name_and_address_mode("LAR", AddressingMode::AbsoluteY).unwrap().code;
+        let memory_value = 0;
+        let stack_pointer = 0b0010_1111;
+        let expected = 0;
+        let address_high = 0x1A;
+        let address_low = 0xBC;
+        let address = (address_high as u16) << 8 | (address_low as u16 + 3);
+        let program = vec![code, address_low, address_high, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.write(address as u16, memory_value as u8).unwrap();
+        cpu.register_y = 3;
+        cpu.stack_pointer = stack_pointer;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address as u16).unwrap();
+        assert_eq!(stored, memory_value);
+        assert_eq!(cpu.stack_pointer, expected);
+        assert_eq!(cpu.register_a, expected);
+        assert_eq!(cpu.register_x, expected);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+    }
 }
