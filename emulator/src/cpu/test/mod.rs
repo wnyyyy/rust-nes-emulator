@@ -306,7 +306,7 @@ mod test {
     }
 
     #[test]
-    fn test_sbc_no_flags_plus_borrow() {
+    fn test_sbc_no_flags_borrow() {
         let code = get_opcode_by_name_and_address_mode("SBC", AddressingMode::Immediate).unwrap().code;
         let base_value = 5;
         let sub_value = 1;
@@ -2185,5 +2185,125 @@ mod test {
         assert!(!cpu.status.carry);
         assert!(!cpu.status.zero);
         assert!(cpu.status.negative);
+    }
+
+    #[test]
+    fn test_isc_no_flags_borrow() {
+        let code = get_opcode_by_name_and_address_mode("ISC", AddressingMode::ZeroPage).unwrap().code;
+        let accumulator = 8;
+        let memory_value = 2;
+        let address = 0x0A;
+        let program = vec![code, address, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.write(address as u16, memory_value).unwrap();
+        cpu.status.carry = false;
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address as u16).unwrap();
+        assert_eq!(stored, 3);
+        assert_eq!(cpu.register_a, 4);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.carry);
+        assert!(!cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_isc_negative() {
+        let code = get_opcode_by_name_and_address_mode("ISC", AddressingMode::ZeroPage).unwrap().code;
+        let accumulator = 0;
+        let memory_value = 0xFF;
+        let address = 0x0A;
+        let program = vec![code, address, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.write(address as u16, memory_value).unwrap();
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address as u16).unwrap();
+        assert_eq!(stored, 0);
+        assert_eq!(cpu.register_a, 0xFF);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.carry);
+        assert!(!cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_isc_zero() {
+        let code = get_opcode_by_name_and_address_mode("ISC", AddressingMode::ZeroPage).unwrap().code;
+        let accumulator = 8;
+        let memory_value = 7;
+        let address = 0x0A;
+        let program = vec![code, address, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.write(address as u16, memory_value).unwrap();
+        cpu.status.carry = true;
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address as u16).unwrap();
+        assert_eq!(stored, 8);
+        assert_eq!(cpu.register_a, 0);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.carry);
+        assert!(!cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_isc_carry() {
+        let code = get_opcode_by_name_and_address_mode("ISC", AddressingMode::ZeroPage).unwrap().code;
+        let accumulator = 2;
+        let memory_value = 1;
+        let address = 0x0A;
+        let program = vec![code, address, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.write(address as u16, memory_value).unwrap();
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address as u16).unwrap();
+        assert_eq!(stored, 2);
+        assert_eq!(cpu.register_a, 0xFF);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.carry);
+        assert!(!cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_isc_overflow_negative() {
+        let code = get_opcode_by_name_and_address_mode("ISC", AddressingMode::ZeroPage).unwrap().code;
+        let accumulator = 0x88;
+        let memory_value = 0x08;
+        let address = 0x0A;
+        let program = vec![code, address, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.write(address as u16, memory_value as u8).unwrap();
+        cpu.status.carry = true;
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address as u16).unwrap();
+        assert_eq!(stored, 0x09);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.overflow);
+    }
+
+    #[test]
+    fn test_isc_overflow_positive() {
+        let code = get_opcode_by_name_and_address_mode("ISC", AddressingMode::ZeroPage).unwrap().code;
+        let accumulator = 0x78;
+        let memory_value = 0xF7;
+        let address = 0x0A;
+        let program = vec![code, address, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.write(address as u16, memory_value as u8).unwrap();
+        cpu.status.carry = true;
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address as u16).unwrap();
+        assert_eq!(stored, 0xF8);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+        assert!(cpu.status.overflow);
     }
 }

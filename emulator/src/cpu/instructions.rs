@@ -52,7 +52,8 @@ pub fn adc(cpu: &mut CPU, param: u8) {
 
 pub fn sbc(cpu: &mut CPU, param: u8) {
     let carry = if cpu.status.carry { 0 } else { 1 };
-    let (result, cout) = cpu.register_a.overflowing_sub(param.wrapping_add(carry));
+    let param = param.wrapping_add(carry);
+    let (result, cout) = cpu.register_a.overflowing_sub(param);
     let old_a = cpu.register_a;
     cpu.register_a = result;
 
@@ -506,7 +507,6 @@ pub fn axa(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     Ok(())
 }
 
-
 pub fn dcp(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     let value = cpu.read(address)?;
     let decrement = value.wrapping_sub(1);
@@ -514,6 +514,22 @@ pub fn dcp(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     cpu.status.zero = cpu.register_a == decrement;
     cpu.status.negative = is_negative(decrement);
     cpu.status.carry = cpu.register_a >= decrement;
+    Ok(())
+}
+
+pub fn isc(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    let value = cpu.read(address)?;
+    let increment = value.wrapping_add(1);
+    cpu.write(address, increment)?;
+    let carry = if cpu.status.carry { 0 } else { 1 };
+    let increment = increment.wrapping_add(carry);
+    let (result, cout) = cpu.register_a.overflowing_sub(increment);
+    let old_a = cpu.register_a;
+    cpu.register_a = result;
+    cpu.status.zero = cpu.register_a == 0;
+    cpu.status.negative = is_negative(result);
+    cpu.status.carry = !cout;
+    cpu.status.overflow = overflows_negative(result as u16, old_a, increment);
     Ok(())
 }
 
