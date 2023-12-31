@@ -362,7 +362,9 @@ impl CPU {
                     instructions::asr(self, param);
                 }
                 "ATX" => {
-                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    let param = self.read(param_address)?;
+                    instructions::atx(self, param);
                 }
                 "AXA" => {
                     Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;

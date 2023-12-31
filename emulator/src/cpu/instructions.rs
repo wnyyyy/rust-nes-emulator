@@ -492,6 +492,13 @@ pub fn asr(cpu: &mut CPU, param: u8) {
     cpu.status.negative = is_negative(cpu.register_a);
 }
 
+pub fn atx(cpu: &mut CPU, param: u8) {
+    cpu.register_a &= param;
+    cpu.status.zero = cpu.register_a == 0;
+    cpu.status.negative = is_negative(cpu.register_a);
+    cpu.register_x = cpu.register_a;
+}
+
 fn stack_push(cpu: &mut CPU, value: u8) -> Result<(), EmulatorError> {
     let sp_address = cpu.stack_pointer as u16 + STACK_START;
     cpu.write(sp_address, value)?;
