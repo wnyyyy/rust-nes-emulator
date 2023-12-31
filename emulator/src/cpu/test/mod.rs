@@ -2544,11 +2544,11 @@ mod test {
     #[test]
     fn test_rra_negative() {
         let code = get_opcode_by_name_and_address_mode("RRA", AddressingMode::Absolute).unwrap().code;
-        let memory_value = 0b1110_0000;
-        let accumulator = 0b0101_0000;
+        let memory_value = 0b0000_1000;
+        let accumulator = 0b1101_0000;
         let initial_carry = false;
-        let expected_memory = 0b0111_0000;
-        let expected_accumulator = 0b1100_0000;
+        let expected_memory = 0b0000_0100;
+        let expected_accumulator = 0b1101_0100;
         let expected_carry = false;
         let address_high = 0x1A;
         let address_low = 0xBC;
@@ -2646,7 +2646,7 @@ mod test {
         assert!(cpu.status.zero);
         assert!(!cpu.status.negative);
         assert_eq!(cpu.status.carry, expected_carry);
-        assert!(!cpu.status.overflow);
+        assert!(cpu.status.overflow);
     }
 
     #[test]

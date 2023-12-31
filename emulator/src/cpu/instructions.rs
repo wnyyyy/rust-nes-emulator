@@ -542,6 +542,22 @@ pub fn lar(cpu: &mut CPU, param: u8) {
     cpu.status.negative = is_negative(result);
 }
 
+pub fn rra(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    let value = cpu.read(address)?;
+    let carry_old = if cpu.status.carry { 0b1000_0000 } else { 0 };
+    let carry_rotate = value & 1;
+    let result = value.wrapping_shr(1) | carry_old;
+    cpu.write(address, result)?;
+    let old_a = cpu.register_a;
+    let (result_sum, cout) = cpu.register_a.overflowing_add(result + carry_rotate);
+    cpu.register_a = result_sum;
+    cpu.status.carry = cout;
+    cpu.status.zero = result_sum == 0;
+    cpu.status.negative = is_negative(result_sum);
+    cpu.status.overflow = overflows_positive(result_sum as u16, old_a, result + carry_rotate);
+    Ok(())
+}
+
 fn stack_push(cpu: &mut CPU, value: u8) -> Result<(), EmulatorError> {
     let sp_address = cpu.stack_pointer as u16 + STACK_START;
     cpu.write(sp_address, value)?;

@@ -396,7 +396,8 @@ impl CPU {
                     Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
                 }
                 "RRA" => {
-                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    instructions::rra(self, param_address)?;
                 }
                 "SLO" => {
                     Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
