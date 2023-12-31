@@ -341,6 +341,73 @@ impl CPU {
                     increase_pc = false;
                 }
                 "NOP" => {}
+                // Unofficial
+                "AAC" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "AAX" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "ARR" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "ASR" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "ATX" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "AXA" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "AXS" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "DCP" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "DOP" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "ISC" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "KIL" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "LAR" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "LAX" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "RLA" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "RRA" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "SLO" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "SRE" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "SXA" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "SYA" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "TOP" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "XAA" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
+                "XAS" => {
+                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                }
                 _ => return Err(EmulatorError::UnimplementedOpcode(opcode_u8)),
             }
             if increase_pc {
