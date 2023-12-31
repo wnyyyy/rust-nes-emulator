@@ -1982,4 +1982,148 @@ mod test {
         assert!(!cpu.status.negative);
         assert!(cpu.status.zero);
     }
+
+    #[test]
+    fn test_atx_positive() {
+        let code = get_opcode_by_name_and_address_mode("ATX", AddressingMode::Accumulator).unwrap().code;
+        let accumulator = 0b1011_0111;
+        let param = 0b0010_0011;
+        let expected = 0b0010_0011;
+        let program = vec![code, param, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert_eq!(cpu.register_x, expected);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_atx_negative() {
+        let code = get_opcode_by_name_and_address_mode("ATX", AddressingMode::Accumulator).unwrap().code;
+        let accumulator = 0b1001_0110;
+        let param = 0b1111_0011;
+        let expected = 0b1001_0010;
+        let program = vec![code, param, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert_eq!(cpu.register_x, expected);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_atx_zero() {
+        let code = get_opcode_by_name_and_address_mode("ATX", AddressingMode::Accumulator).unwrap().code;
+        let accumulator = 0b1001_0110;
+        let param = 0;
+        let expected = 0;
+        let program = vec![code, param, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, expected);
+        assert_eq!(cpu.register_x, expected);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.zero);
+    }
+
+    #[test]
+    fn test_axa() {
+        let code = get_opcode_by_name_and_address_mode("AXA", AddressingMode::Accumulator).unwrap().code;
+        let accumulator = 0b1101_1111;
+        let x = 0b1111_1011;
+        let expected = 0b0000_0011;
+        let address_high = 0x1A;
+        let address_low = 0xBC;
+        let address = (address_high as u16) << 8 | address_low as u16;
+        let program = vec![code, address_high, address_low, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.register_x = x;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address).unwrap();
+        assert_eq!(cpu.register_a, accumulator);
+        assert_eq!(cpu.register_x, x);
+        assert_eq!(stored, expected);
+    }
+
+    #[test]
+    fn test_axs_positive() {
+        let code = get_opcode_by_name_and_address_mode("AXS", AddressingMode::Accumulator).unwrap().code;
+        let accumulator = 0b1111_1111;
+        let x = 0b0011_1100;
+        let subtract = 0b0000_1100;
+        let expected = 0b0011_0000;
+        let program = vec![code, subtract, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.register_x = x;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, accumulator);
+        assert_eq!(cpu.register_x, expected);
+        assert!(cpu.status.carry);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_axs_borrow() {
+        let code = get_opcode_by_name_and_address_mode("AXS", AddressingMode::Accumulator).unwrap().code;
+        let accumulator = 0b1010_0000;
+        let x = 0b0011_0000;
+        let subtract = 0b0100_0000;
+        let expected = 0b0001_0000;
+        let program = vec![code, subtract, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.register_x = x;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, accumulator);
+        assert_eq!(cpu.register_x, expected);
+        assert!(cpu.status.carry);
+        assert!(!cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_axs_negative() {
+        let code = get_opcode_by_name_and_address_mode("AXS", AddressingMode::Accumulator).unwrap().code;
+        let accumulator = 0b1010_0001;
+        let x = 0b1011_0001;
+        let subtract = 0b0000_0001;
+        let expected = 0b1010_0000;
+        let program = vec![code, subtract, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.register_x = x;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, accumulator);
+        assert_eq!(cpu.register_x, expected);
+        assert!(!cpu.status.carry);
+        assert!(cpu.status.negative);
+        assert!(!cpu.status.zero);
+    }
+
+    #[test]
+    fn test_axs_zero() {
+        let code = get_opcode_by_name_and_address_mode("AXS", AddressingMode::Accumulator).unwrap().code;
+        let accumulator = 0b1010_0001;
+        let x = 0b1011_0001;
+        let subtract = 0b1010_0001;
+        let expected = 0;
+        let program = vec![code, subtract, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_a = accumulator;
+        cpu.register_x = x;
+        cpu.run(|_| Ok(())).unwrap();
+        assert_eq!(cpu.register_a, accumulator);
+        assert_eq!(cpu.register_x, expected);
+        assert!(!cpu.status.carry);
+        assert!(!cpu.status.negative);
+        assert!(cpu.status.zero);
+    }
 }
