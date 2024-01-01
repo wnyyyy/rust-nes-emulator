@@ -569,6 +569,15 @@ pub fn axs(cpu: &mut CPU, address: u16) ->  Result<(), EmulatorError> {
     Ok(())
 }
 
+pub fn lax(cpu: &mut CPU, address: u16) ->  Result<(), EmulatorError> {
+    let value = cpu.read(address)?;
+    cpu.status.zero = value ==0;
+    cpu.status.negative = is_negative(value);
+    cpu.register_a = value;
+    cpu.register_x = value;
+    Ok(())
+}
+
 fn stack_push(cpu: &mut CPU, value: u8) -> Result<(), EmulatorError> {
     let sp_address = cpu.stack_pointer as u16 + STACK_START;
     cpu.write(sp_address, value)?;
