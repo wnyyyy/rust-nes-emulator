@@ -2076,7 +2076,7 @@ mod test {
         let accumulator = 0b1010_0000;
         let x = 0b0011_0000;
         let subtract = 0b0100_0000;
-        let expected = 0b0001_0000;
+        let expected = 0b1110_0000;
         let program = vec![code, subtract, 0];
         let mut cpu = initialize_cpu(program);
         cpu.register_a = accumulator;
@@ -2084,8 +2084,8 @@ mod test {
         cpu.run(|_| Ok(())).unwrap();
         assert_eq!(cpu.register_a, accumulator);
         assert_eq!(cpu.register_x, expected);
-        assert!(cpu.status.carry);
-        assert!(!cpu.status.negative);
+        assert!(!cpu.status.carry);
+        assert!(cpu.status.negative);
         assert!(!cpu.status.zero);
     }
 
@@ -2103,7 +2103,7 @@ mod test {
         cpu.run(|_| Ok(())).unwrap();
         assert_eq!(cpu.register_a, accumulator);
         assert_eq!(cpu.register_x, expected);
-        assert!(!cpu.status.carry);
+        assert!(cpu.status.carry);
         assert!(cpu.status.negative);
         assert!(!cpu.status.zero);
     }
@@ -2122,7 +2122,7 @@ mod test {
         cpu.run(|_| Ok(())).unwrap();
         assert_eq!(cpu.register_a, accumulator);
         assert_eq!(cpu.register_x, expected);
-        assert!(!cpu.status.carry);
+        assert!(cpu.status.carry);
         assert!(!cpu.status.negative);
         assert!(cpu.status.zero);
     }

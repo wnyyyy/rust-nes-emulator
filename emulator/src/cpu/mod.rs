@@ -371,7 +371,8 @@ impl CPU {
                     instructions::axa(self, param_address)?
                 }
                 "AXS" => {
-                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    instructions::axs(self, param_address)?
                 }
                 "DCP" => {
                     let param_address = self.get_param_address(&opcode.address_mode)?;

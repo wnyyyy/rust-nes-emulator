@@ -558,6 +558,17 @@ pub fn rra(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     Ok(())
 }
 
+pub fn axs(cpu: &mut CPU, address: u16) ->  Result<(), EmulatorError> {
+    let value = cpu.read(address)?;
+    let result = cpu.register_a & cpu.register_x;
+    let (sub_result, cout) = result.overflowing_sub(value);
+    cpu.status.zero = sub_result == 0;
+    cpu.status.negative = is_negative(sub_result);
+    cpu.status.carry = !cout;
+    cpu.register_x = sub_result;
+    Ok(())
+}
+
 fn stack_push(cpu: &mut CPU, value: u8) -> Result<(), EmulatorError> {
     let sp_address = cpu.stack_pointer as u16 + STACK_START;
     cpu.write(sp_address, value)?;
