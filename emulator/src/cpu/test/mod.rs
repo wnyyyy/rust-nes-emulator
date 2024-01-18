@@ -2729,4 +2729,170 @@ mod test {
         assert_eq!(cpu.status.carry, expected_carry);
         assert!(cpu.status.overflow);
     }
+
+    #[test]
+    fn test_slo_positive() {
+        let code = get_opcode_by_name_and_address_mode("SLO", AddressingMode::Absolute).unwrap().code;
+        let memory_value = 0b0010_1100;
+        let accumulator = 0b0000_1001;
+        let initial_carry = false;
+        let expected_memory = 0b0101_1000;
+        let expected_accumulator = 0b0101_1001;
+        let expected_carry = false;
+        let address_high = 0x1A;
+        let address_low = 0xBC;
+        let address = (address_high as u16) << 8 | address_low as u16;
+        let program = vec![code, address_low, address_high, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.write(address, memory_value).unwrap();
+        cpu.status.carry = initial_carry;
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address).unwrap();
+        assert_eq!(stored, expected_memory);
+        assert_eq!(cpu.register_a, expected_accumulator);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert_eq!(cpu.status.carry, expected_carry);
+    }
+
+    #[test]
+    fn test_slo_zero_carry() {
+        let code = get_opcode_by_name_and_address_mode("SLO", AddressingMode::Absolute).unwrap().code;
+        let memory_value = 0b1000_0000;
+        let accumulator = 0b0000_0000;
+        let initial_carry = false;
+        let expected_memory = 0b0000_0000;
+        let expected_accumulator = 0b0000_0000;
+        let expected_carry = true;
+        let address_high = 0x1A;
+        let address_low = 0xBC;
+        let address = (address_high as u16) << 8 | address_low as u16;
+        let program = vec![code, address_low, address_high, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.write(address, memory_value).unwrap();
+        cpu.status.carry = initial_carry;
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address).unwrap();
+        assert_eq!(stored, expected_memory);
+        assert_eq!(cpu.register_a, expected_accumulator);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert_eq!(cpu.status.carry, expected_carry);
+    }
+
+    #[test]
+    fn test_slo_negative() {
+        let code = get_opcode_by_name_and_address_mode("SLO", AddressingMode::Absolute).unwrap().code;
+        let memory_value = 0b0000_0001;
+        let accumulator = 0b1000_0000;
+        let initial_carry = false;
+        let expected_memory = 0b0000_0010;
+        let expected_accumulator = 0b1000_0010;
+        let expected_carry = false;
+        let address_high = 0x1A;
+        let address_low = 0xBC;
+        let address = (address_high as u16) << 8 | address_low as u16;
+        let program = vec![code, address_low, address_high, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.write(address, memory_value).unwrap();
+        cpu.status.carry = initial_carry;
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address).unwrap();
+        assert_eq!(stored, expected_memory);
+        assert_eq!(cpu.register_a, expected_accumulator);
+        assert!(!cpu.status.zero);
+        assert!(cpu.status.negative);
+        assert_eq!(!cpu.status.carry, expected_carry);
+    }
+
+    #[test]
+    fn test_sre_positive() {
+        let code = get_opcode_by_name_and_address_mode("SRE", AddressingMode::Absolute).unwrap().code;
+        let memory_value = 0b1010_0010;
+        let accumulator = 0b0011_0000;
+        let initial_carry = false;
+        let expected_memory = 0b0101_0001;
+        let expected_accumulator = 0b0110_0001;
+        let expected_carry = false;
+        let address_high = 0x1A;
+        let address_low = 0xBC;
+        let address = (address_high as u16) << 8 | address_low as u16;
+        let program = vec![code, address_low, address_high, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.write(address, memory_value).unwrap();
+        cpu.status.carry = initial_carry;
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address).unwrap();
+        assert_eq!(stored, expected_memory);
+        assert_eq!(cpu.register_a, expected_accumulator);
+        assert!(!cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert_eq!(!cpu.status.carry, expected_carry);
+    }
+
+    #[test]
+    fn test_sre_zero_carry() {
+        let code = get_opcode_by_name_and_address_mode("SRE", AddressingMode::Absolute).unwrap().code;
+        let memory_value = 0b0100_1001;
+        let accumulator = 0b0010_0100;
+        let initial_carry = false;
+        let expected_memory = 0b0010_0100;
+        let expected_accumulator = 0b0000_0000;
+        let expected_carry = true;
+        let address_high = 0x1A;
+        let address_low = 0xBC;
+        let address = (address_high as u16) << 8 | address_low as u16;
+        let program = vec![code, address_low, address_high, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.write(address, memory_value).unwrap();
+        cpu.status.carry = initial_carry;
+        cpu.register_a = accumulator;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address).unwrap();
+        assert_eq!(stored, expected_memory);
+        assert_eq!(cpu.register_a, expected_accumulator);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
+        assert_eq!(cpu.status.carry, expected_carry);
+    }
+
+    #[test]
+    fn test_sxa() {
+        let code = get_opcode_by_name_and_address_mode("SXA", AddressingMode::AbsoluteY).unwrap().code;
+        let y_register = 0x03;
+        let x_register = 0b0000_0101;
+        let address_high = 0b0000_0011;
+        let expected_high_address = 0b0000_0010;
+        let address_low = 0xC0;
+        let address = (address_high as u16) << 8 | (address_low + y_register) as u16;
+        let program = vec![code, address_low, address_high, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_x = x_register;
+        cpu.register_y = y_register;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address).unwrap();
+        assert_eq!(stored, expected_high_address);
+    }
+
+    #[test]
+    fn test_sya() {
+        let code = get_opcode_by_name_and_address_mode("SYA", AddressingMode::AbsoluteX).unwrap().code;
+        let x_register = 0x05;
+        let y_register = 0b0000_1110;
+        let address_high = 0b0000_0101;
+        let expected_high_address = 0b0000_0101;
+        let address_low = 0xC0;
+        let address = (address_high as u16) << 8 | (address_low + x_register) as u16;
+        let program = vec![code, address_low, address_high, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_x = x_register;
+        cpu.register_y = y_register;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address).unwrap();
+        assert_eq!(stored, expected_high_address);
+    }
 }
