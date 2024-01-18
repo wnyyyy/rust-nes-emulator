@@ -578,6 +578,40 @@ pub fn lax(cpu: &mut CPU, address: u16) ->  Result<(), EmulatorError> {
     Ok(())
 }
 
+pub fn slo(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    let value = cpu.read(address)?;
+    cpu.status.carry = value & 0b1000_0000 != 0;
+    let result = value.wrapping_shl(1);
+    cpu.write(address, result)?;
+    cpu.register_a |= result;
+    cpu.status.zero = cpu.register_a == 0;
+    cpu.status.negative = is_negative(cpu.register_a);
+    Ok(())
+}
+
+pub fn sre(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    let value = cpu.read(address)?;
+    cpu.status.carry = value & 0b0000_0001 != 0;
+    let result = value.wrapping_shr(1);
+    cpu.write(address, result)?;
+    cpu.register_a ^= result;
+    cpu.status.zero = cpu.register_a == 0;
+    cpu.status.negative = is_negative(cpu.register_a);
+    Ok(())
+}
+
+pub fn sxa(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    let result = cpu.register_x & ((address >> 8) + 1) as u8;
+    cpu.write(address, result)?;
+    Ok(())
+}
+
+pub fn sya(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    let result = cpu.register_y & ((address >> 8) + 1) as u8;
+    cpu.write(address, result)?;
+    Ok(())
+}
+
 fn stack_push(cpu: &mut CPU, value: u8) -> Result<(), EmulatorError> {
     let sp_address = cpu.stack_pointer as u16 + STACK_START;
     cpu.write(sp_address, value)?;

@@ -402,16 +402,20 @@ impl CPU {
                     instructions::rra(self, param_address)?;
                 }
                 "SLO" => {
-                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    instructions::slo(self, param_address)?;
                 }
                 "SRE" => {
-                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    instructions::sre(self, param_address)?;
                 }
                 "SXA" => {
-                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    instructions::sxa(self, param_address)?;
                 }
                 "SYA" => {
-                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    instructions::sya(self, param_address)?;
                 }
                 "XAA" => {
                     Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
