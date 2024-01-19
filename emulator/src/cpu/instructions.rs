@@ -517,7 +517,7 @@ pub fn dcp(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     Ok(())
 }
 
-pub fn isc(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+pub fn isb(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     let value = cpu.read(address)?;
     let increment = value.wrapping_add(1);
     cpu.write(address, increment)?;

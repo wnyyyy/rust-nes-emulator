@@ -2188,8 +2188,8 @@ mod test {
     }
 
     #[test]
-    fn test_isc_no_flags_borrow() {
-        let code = get_opcode_by_name_and_address_mode("ISC", AddressingMode::ZeroPage).unwrap().code;
+    fn test_isb_no_flags_borrow() {
+        let code = get_opcode_by_name_and_address_mode("ISB", AddressingMode::ZeroPage).unwrap().code;
         let accumulator = 8;
         let memory_value = 2;
         let address = 0x0A;
@@ -2209,8 +2209,8 @@ mod test {
     }
 
     #[test]
-    fn test_isc_negative() {
-        let code = get_opcode_by_name_and_address_mode("ISC", AddressingMode::ZeroPage).unwrap().code;
+    fn test_isb_negative() {
+        let code = get_opcode_by_name_and_address_mode("ISB", AddressingMode::ZeroPage).unwrap().code;
         let accumulator = 0;
         let memory_value = 0xFF;
         let address = 0x0A;
@@ -2229,8 +2229,8 @@ mod test {
     }
 
     #[test]
-    fn test_isc_zero() {
-        let code = get_opcode_by_name_and_address_mode("ISC", AddressingMode::ZeroPage).unwrap().code;
+    fn test_isb_zero() {
+        let code = get_opcode_by_name_and_address_mode("ISB", AddressingMode::ZeroPage).unwrap().code;
         let accumulator = 8;
         let memory_value = 7;
         let address = 0x0A;
@@ -2250,8 +2250,8 @@ mod test {
     }
 
     #[test]
-    fn test_isc_carry() {
-        let code = get_opcode_by_name_and_address_mode("ISC", AddressingMode::ZeroPage).unwrap().code;
+    fn test_isb_carry() {
+        let code = get_opcode_by_name_and_address_mode("ISB", AddressingMode::ZeroPage).unwrap().code;
         let accumulator = 2;
         let memory_value = 1;
         let address = 0x0A;
@@ -2270,8 +2270,8 @@ mod test {
     }
 
     #[test]
-    fn test_isc_overflow_negative() {
-        let code = get_opcode_by_name_and_address_mode("ISC", AddressingMode::ZeroPage).unwrap().code;
+    fn test_isb_overflow_negative() {
+        let code = get_opcode_by_name_and_address_mode("ISB", AddressingMode::ZeroPage).unwrap().code;
         let accumulator = 0x88;
         let memory_value = 0x08;
         let address = 0x0A;
@@ -2289,8 +2289,8 @@ mod test {
     }
 
     #[test]
-    fn test_isc_overflow_positive() {
-        let code = get_opcode_by_name_and_address_mode("ISC", AddressingMode::ZeroPage).unwrap().code;
+    fn test_isb_overflow_positive() {
+        let code = get_opcode_by_name_and_address_mode("ISB", AddressingMode::ZeroPage).unwrap().code;
         let accumulator = 0x78;
         let memory_value = 0xF7;
         let address = 0x0A;

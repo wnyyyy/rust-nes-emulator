@@ -378,9 +378,9 @@ impl CPU {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
                     instructions::dcp(self, param_address)?;
                 }
-                "ISC" => {
+                "ISB" => {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
-                    instructions::isc(self, param_address)?;
+                    instructions::isb(self, param_address)?;
                 }
                 "KIL" => {
                     Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
