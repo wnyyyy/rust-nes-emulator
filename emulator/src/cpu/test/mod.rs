@@ -2895,4 +2895,26 @@ mod test {
         let stored = cpu.read(address).unwrap();
         assert_eq!(stored, expected_high_address);
     }
+
+    #[test]
+    fn test_xas() {
+        let code = get_opcode_by_name_and_address_mode("XAS", AddressingMode::AbsoluteY).unwrap().code;
+        let address_low = 0xC0;
+        let address_high = 0b0000_0011;
+        let y_register = 0x02;
+        let x_register = 0b0000_0111;
+        let a_register = 0b0000_0101;
+        let sp = 0b0000_0101;
+        let result = 0b0000_0010;
+        let address = (address_high as u16) << 8 | (address_low + y_register) as u16;
+        let program = vec![code, address_low, address_high, 0];
+        let mut cpu = initialize_cpu(program);
+        cpu.register_x = x_register;
+        cpu.register_y = y_register;
+        cpu.register_a = a_register;
+        cpu.run(|_| Ok(())).unwrap();
+        let stored = cpu.read(address).unwrap();
+        assert_eq!(stored, result);
+        assert_eq!(cpu.stack_pointer, sp);
+    }
 }
