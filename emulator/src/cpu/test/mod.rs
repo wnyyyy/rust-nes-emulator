@@ -2805,7 +2805,7 @@ mod test {
         assert_eq!(cpu.register_a, expected_accumulator);
         assert!(!cpu.status.zero);
         assert!(cpu.status.negative);
-        assert_eq!(!cpu.status.carry, expected_carry);
+        assert_eq!(cpu.status.carry, expected_carry);
     }
 
     #[test]
@@ -2831,7 +2831,7 @@ mod test {
         assert_eq!(cpu.register_a, expected_accumulator);
         assert!(!cpu.status.zero);
         assert!(!cpu.status.negative);
-        assert_eq!(!cpu.status.carry, expected_carry);
+        assert_eq!(cpu.status.carry, expected_carry);
     }
 
     #[test]
