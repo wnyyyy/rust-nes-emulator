@@ -2866,7 +2866,7 @@ mod test {
         let y_register = 0x03;
         let x_register = 0b0000_0101;
         let address_high = 0b0000_0011;
-        let expected_high_address = 0b0000_0100;
+        let expected_high_address = 0b0000_0010;
         let address_low = 0xC0;
         let address = (address_high as u16) << 8 | (address_low + y_register) as u16;
         let program = vec![code, address_low, address_high, 0];
@@ -2884,7 +2884,7 @@ mod test {
         let x_register = 0x05;
         let y_register = 0b0000_1110;
         let address_high = 0b0000_0101;
-        let expected_high_address = 0b0000_0110;
+        let expected_high_address = 0b0000_0101;
         let address_low = 0xC0;
         let address = (address_high as u16) << 8 | (address_low + x_register) as u16;
         let program = vec![code, address_low, address_high, 0];

@@ -614,13 +614,15 @@ pub fn sre(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
 }
 
 pub fn sxa(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
-    let result = cpu.register_x & ((address >> 8) + 1) as u8;
+    let address_high = (address >> 8) as u8;
+    let result = (cpu.register_x & address_high).wrapping_add(1);
     cpu.write(address, result)?;
     Ok(())
 }
 
 pub fn sya(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
-    let result = cpu.register_y & ((address >> 8) + 1) as u8;
+    let address_high = (address >> 8) as u8;
+    let result = (cpu.register_y & address_high).wrapping_add(1);
     cpu.write(address, result)?;
     Ok(())
 }
@@ -628,7 +630,8 @@ pub fn sya(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
 pub fn xas(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     let new_sp = cpu.register_a & cpu.register_x;
     cpu.stack_pointer = new_sp;
-    let result = new_sp & ((address >> 8) + 1) as u8;
+    let address_high = (address >> 8) as u8;
+    let result = (new_sp & address_high).wrapping_add(1);
     cpu.write(address, result)?;
     Ok(())
 }
