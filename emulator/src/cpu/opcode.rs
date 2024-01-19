@@ -214,10 +214,10 @@ lazy_static! {
         // Unofficial
         add_opcode(m, Opcode::new("AAC", 0x0B, 2, 2, AddressingMode::Immediate, true));
         add_opcode(m, Opcode::new("AAC", 0x2B, 2, 2, AddressingMode::Immediate, true));
-        add_opcode(m, Opcode::new("AAX", 0x87, 2, 3, AddressingMode::ZeroPage, true));
-        add_opcode(m, Opcode::new("AAX", 0x97, 2, 4, AddressingMode::ZeroPageY, true));
-        add_opcode(m, Opcode::new("AAX", 0x83, 2, 6, AddressingMode::IndexedIndirect, true));
-        add_opcode(m, Opcode::new("AAX", 0x8F, 3, 4, AddressingMode::Absolute, true));
+        add_opcode(m, Opcode::new("SAX", 0x87, 2, 3, AddressingMode::ZeroPage, true));
+        add_opcode(m, Opcode::new("SAX", 0x97, 2, 4, AddressingMode::ZeroPageY, true));
+        add_opcode(m, Opcode::new("SAX", 0x83, 2, 6, AddressingMode::IndexedIndirect, true));
+        add_opcode(m, Opcode::new("SAX", 0x8F, 3, 4, AddressingMode::Absolute, true));
         add_opcode(m, Opcode::new("ARR", 0x6B, 2, 2, AddressingMode::Immediate, true));
         add_opcode(m, Opcode::new("ASR", 0x4B, 2, 2, AddressingMode::Immediate, true));
         add_opcode(m, Opcode::new("ATX", 0xAB, 2, 2, AddressingMode::Immediate, true));

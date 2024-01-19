@@ -347,9 +347,9 @@ impl CPU {
                     let param = self.read(param_address)?;
                     instructions::aac(self, param);
                 }
-                "AAX" => {
+                "SAX" => {
                     let param = self.get_param_address(&opcode.address_mode)?;
-                    instructions::aax(self, param);
+                    instructions::sax(self, param);
                 }
                 "ARR" => {
                     let param_address = self.get_param_address(&opcode.address_mode)?;
