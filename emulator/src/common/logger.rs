@@ -5,8 +5,8 @@ use crate::cpu::opcode::get_opcode;
 use crate::memory::memory::Memory;
 
 const PC_WIDTH: usize = 6;
-const CODE_WIDTH: usize = 10;
-const INSTRUCTION_WIDTH: usize = 32;
+const CODE_WIDTH: usize = 9;
+const INSTRUCTION_WIDTH: usize = 33;
 const PPU_HALF_WITDH: usize = 4;
 const NO_DATA_LOAD_OPCODES: [&str; 2] = ["JMP", "JSR"];
 
@@ -45,6 +45,9 @@ fn get_instruction_str(cpu: &CPU) -> Result<String, EmulatorError> {
     if let Some(opcode) = get_opcode(opcode_code) {
         if opcode.unofficial {
             instruction.push_str("*");
+        }
+        else {
+            instruction.push_str(" ");
         }
         instruction.push_str(&format!("{} ", opcode.name));
         let low_byte = if opcode.bytes > 1 { Some(cpu.read(cpu.program_counter + 1)?) } else { None };
