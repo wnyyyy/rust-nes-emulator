@@ -448,8 +448,6 @@ pub fn aac(cpu: &mut CPU, param: u8) {
 pub fn sax(cpu: &mut CPU, address: u16) {
     let result = cpu.register_a & cpu.register_x;
     cpu.write(address, result).unwrap();
-    cpu.status.zero = result == 0;
-    cpu.status.negative = is_negative(result);
 }
 
 pub fn arr(cpu: &mut CPU, param: u8) {
