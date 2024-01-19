@@ -625,6 +625,14 @@ pub fn sya(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     Ok(())
 }
 
+pub fn xas(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    let new_sp = cpu.register_a & cpu.register_x;
+    cpu.stack_pointer = new_sp;
+    let result = new_sp & ((address >> 8) + 1) as u8;
+    cpu.write(address, result)?;
+    Ok(())
+}
+
 fn stack_push(cpu: &mut CPU, value: u8) -> Result<(), EmulatorError> {
     let sp_address = cpu.stack_pointer as u16 + STACK_START;
     cpu.write(sp_address, value)?;

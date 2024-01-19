@@ -419,10 +419,11 @@ impl CPU {
                     instructions::sya(self, param_address)?;
                 }
                 "XAA" => {
-                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                    { }
                 }
                 "XAS" => {
-                    Err(EmulatorError::UnimplementedOpcode(opcode_u8))?;
+                    let param_address = self.get_param_address(&opcode.address_mode)?;
+                    instructions::xas(self, param_address)?;
                 }
                 _ => return Err(EmulatorError::UnimplementedOpcode(opcode_u8)),
             }
