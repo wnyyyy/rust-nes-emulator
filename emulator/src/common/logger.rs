@@ -43,6 +43,9 @@ fn get_instruction_str(cpu: &CPU) -> Result<String, EmulatorError> {
     let mut instruction = String::new();
     let opcode_code = cpu.read(cpu.program_counter)?;
     if let Some(opcode) = get_opcode(opcode_code) {
+        if opcode.unofficial {
+            instruction.push_str("*");
+        }
         instruction.push_str(&format!("{} ", opcode.name));
         let low_byte = if opcode.bytes > 1 { Some(cpu.read(cpu.program_counter + 1)?) } else { None };
         let high_byte = if opcode.bytes == 3 { Some(cpu.read(cpu.program_counter + 2)?) } else { None };
