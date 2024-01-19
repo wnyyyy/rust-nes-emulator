@@ -2100,8 +2100,9 @@ mod test {
     #[test]
     fn test_dcp_carry() {
         let code = get_opcode_by_name_and_address_mode("DCP", AddressingMode::Absolute).unwrap().code;
-        let value = 0b0000_0011;
-        let accumulator = 0b0010_0010;
+        let value = 0b0010_1101;
+        let dec_value = 0b0010_1100;
+        let accumulator = 0b0010_1101;
         let address_high = 0x1A;
         let address_low = 0xBC;
         let address = (address_high as u16) << 8 | address_low as u16;
@@ -2111,17 +2112,18 @@ mod test {
         cpu.register_a = accumulator;
         cpu.run(|_| Ok(())).unwrap();
         let stored = cpu.read(address).unwrap();
-        assert_eq!(stored, value.wrapping_sub(1));
+        assert_eq!(stored, dec_value);
         assert!(cpu.status.carry);
         assert!(!cpu.status.zero);
         assert!(!cpu.status.negative);
     }
 
     #[test]
-    fn test_dcp_zero() {
+    fn test_dcp_negative() {
         let code = get_opcode_by_name_and_address_mode("DCP", AddressingMode::Absolute).unwrap().code;
-        let value = 0b1010_0011;
-        let accumulator = 0b1010_0010;
+        let value = 0b0010_0001;
+        let dec_value = 0b0010_0000;
+        let accumulator = 0b1010_0000;
         let address_high = 0x1A;
         let address_low = 0xBC;
         let address = (address_high as u16) << 8 | address_low as u16;
@@ -2131,17 +2133,18 @@ mod test {
         cpu.register_a = accumulator;
         cpu.run(|_| Ok(())).unwrap();
         let stored = cpu.read(address).unwrap();
-        assert_eq!(stored, value.wrapping_sub(1));
+        assert_eq!(stored, dec_value);
         assert!(cpu.status.carry);
-        assert!(cpu.status.zero);
+        assert!(!cpu.status.zero);
         assert!(cpu.status.negative);
     }
 
     #[test]
-    fn test_dcp_negative() {
+    fn test_dcp_zero() {
         let code = get_opcode_by_name_and_address_mode("DCP", AddressingMode::Absolute).unwrap().code;
-        let value = 0b1110_0011;
-        let accumulator = 0b0000_0010;
+        let value = 0b0000_0000;
+        let dec_value = 0b1111_1111;
+        let accumulator = 0b1111_1111;
         let address_high = 0x1A;
         let address_low = 0xBC;
         let address = (address_high as u16) << 8 | address_low as u16;
@@ -2151,10 +2154,10 @@ mod test {
         cpu.register_a = accumulator;
         cpu.run(|_| Ok(())).unwrap();
         let stored = cpu.read(address).unwrap();
-        assert_eq!(stored, value.wrapping_sub(1));
-        assert!(!cpu.status.carry);
-        assert!(!cpu.status.zero);
-        assert!(cpu.status.negative);
+        assert_eq!(stored, dec_value);
+        assert!(cpu.status.carry);
+        assert!(cpu.status.zero);
+        assert!(!cpu.status.negative);
     }
 
     #[test]

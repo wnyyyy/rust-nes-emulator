@@ -508,9 +508,10 @@ pub fn axa(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
 pub fn dcp(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     let value = cpu.read(address)?;
     let decrement = value.wrapping_sub(1);
+    let result = cpu.register_a.wrapping_sub(decrement);
     cpu.write(address, decrement)?;
-    cpu.status.zero = cpu.register_a == decrement;
-    cpu.status.negative = is_negative(decrement);
+    cpu.status.zero = result == 0;
+    cpu.status.negative = is_negative(result);
     cpu.status.carry = cpu.register_a >= decrement;
     Ok(())
 }
