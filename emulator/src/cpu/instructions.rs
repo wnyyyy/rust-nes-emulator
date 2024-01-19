@@ -542,6 +542,19 @@ pub fn lar(cpu: &mut CPU, param: u8) {
     cpu.status.negative = is_negative(result);
 }
 
+pub fn rla(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
+    let value = cpu.read(address)?;
+    let carry = if cpu.status.carry { 1 } else { 0 };
+    cpu.status.carry = value & 0b1000_0000 != 0;
+    let result = value.wrapping_shl(1) | carry;
+    cpu.write(address, result)?;
+    let result_and = result & cpu.register_a;
+    cpu.register_a = result_and;
+    cpu.status.zero = result_and == 0;
+    cpu.status.negative = is_negative(result_and);
+    Ok(())
+}
+
 pub fn rra(cpu: &mut CPU, address: u16) -> Result<(), EmulatorError> {
     let value = cpu.read(address)?;
     let carry_old = if cpu.status.carry { 0b1000_0000 } else { 0 };
